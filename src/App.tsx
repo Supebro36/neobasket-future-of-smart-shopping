@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
 
@@ -16,18 +15,19 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <CartProvider>
-        <AIAssistantProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <AIAssistantProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
@@ -38,11 +38,11 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AIAssistantProvider>
-      </CartProvider>
-    </AuthProvider>
+            </TooltipProvider>
+          </AIAssistantProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

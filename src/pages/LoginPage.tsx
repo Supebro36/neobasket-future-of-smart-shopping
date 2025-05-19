@@ -1,40 +1,56 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
     if (!email || !password || (isRegister && !name)) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
       return;
     }
     
     setIsLoading(true);
     
     try {
-      // Call login function from auth context
-      const success = await login(email, password);
+      let success;
+      
+      if (isRegister) {
+        success = await register(email, password, name);
+      } else {
+        success = await login(email, password);
+      }
       
       if (success) {
-        toast.success(`${isRegister ? 'Registration' : 'Login'} successful!`);
         navigate("/");
-      } else {
-        toast.error(`${isRegister ? 'Registration' : 'Login'} failed. Please try again.`);
       }
     } catch (error) {
       console.error("Authentication error:", error);
@@ -103,13 +119,13 @@ export default function LoginPage() {
             
             {!isRegister && (
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-neo-purple focus:ring-neo-purple border-gray-300 rounded"
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="remember-me" 
+                    checked={rememberMe}
+                    onCheckedChange={() => setRememberMe(!rememberMe)}
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="text-sm text-gray-700">
                     Remember me
                   </label>
                 </div>
@@ -138,6 +154,7 @@ export default function LoginPage() {
               <button
                 onClick={() => setIsRegister(!isRegister)}
                 className="text-neo-purple hover:text-neo-purple/80"
+                type="button"
               >
                 {isRegister ? "Sign In" : "Create one"}
               </button>

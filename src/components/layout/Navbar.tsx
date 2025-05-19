@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 import { useAIAssistant } from "../../contexts/AIAssistantContext";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, MessageSquare, Search } from "lucide-react";
+import { ShoppingCart, User, MessageSquare, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function Navbar() {
@@ -13,6 +13,11 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const { toggleChatWindow } = useAIAssistant();
   const [showSearch, setShowSearch] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div className="border-b sticky top-0 bg-white z-30">
@@ -78,9 +83,10 @@ export default function Navbar() {
                   <Link to="/account" className="block px-4 py-2 text-sm hover:bg-gray-100">My Account</Link>
                   <Link to="/orders" className="block px-4 py-2 text-sm hover:bg-gray-100">My Orders</Link>
                   <button 
-                    onClick={logout} 
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    onClick={handleLogout} 
+                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
+                    <LogOut size={16} className="mr-2" />
                     Logout
                   </button>
                 </div>

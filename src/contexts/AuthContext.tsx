@@ -1,79 +1,195 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User } from "../types";
+import { useNavigate } from "react-router-dom";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "../integrations/supabase/client";
+import { toast } from "sonner";
+import { User as AppUser } from "../types";
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  
-  // Check local storage for saved user on initial load
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("neobasket-user");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error("Failed to parse saved user data", error);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        if (currentSession?.user) {
+          const appUser: AppUser = {
+            id: currentSession.user.id,
+            email: currentSession.user.email || "",
+            name: currentSession.user.user_metadata.name || currentSession.user.email?.split('@')[0] || "",
+            wishlist: [],
+            cart: []
+          };
+          setUser(appUser);
+          
+          // Update local storage with user data
+          localStorage.setItem("neobasket-user", JSON.stringify(appUser));
+        } else {
+          setUser(null);
+          localStorage.removeItem("neobasket-user");
+        }
+        
+        setIsLoading(false);
       }
-    }
+    );
+
+    // THEN check for existing session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        
+        if (initialSession?.user) {
+          const appUser: AppUser = {
+            id: initialSession.user.id,
+            email: initialSession.user.email || "",
+            name: initialSession.user.user_metadata.name || initialSession.user.email?.split('@')[0] || "",
+            wishlist: [],
+            cart: []
+          };
+          setUser(appUser);
+          localStorage.setItem("neobasket-user", JSON.stringify(appUser));
+        }
+      } catch (error) {
+        console.error("Error checking auth session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
-    // In a real app, this would be an API call
-    // For MVP, we'll simulate a successful login
-    if (email && password) {
-      const mockUser: User = {
-        id: "user1",
-        email,
-        name: email.split('@')[0],
-        wishlist: [],
-        cart: []
-      };
+    try {
+      // Clean up existing state
+      cleanupAuthState();
       
-      setUser(mockUser);
-      localStorage.setItem("neobasket-user", JSON.stringify(mockUser));
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.error("Error during global sign out:", err);
+      }
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+
+      toast.success("Successfully signed in!");
       return true;
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login");
+      return false;
     }
-    return false;
   };
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
-    // In a real app, this would be an API call
-    // For MVP, we'll simulate a successful registration
-    if (email && password && name) {
-      const mockUser: User = {
-        id: "user1",
-        email,
-        name,
-        wishlist: [],
-        cart: []
-      };
+    try {
+      // Clean up existing state
+      cleanupAuthState();
       
-      setUser(mockUser);
-      localStorage.setItem("neobasket-user", JSON.stringify(mockUser));
-      return true;
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.error("Error during global sign out:", err);
+      }
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name
+          }
+        }
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+
+      if (data.session) {
+        toast.success("Successfully signed up and logged in!");
+        return true;
+      } else {
+        toast.info("Sign-up successful! Please check your email for verification instructions.");
+        return true;
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("An error occurred during registration");
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("neobasket-user");
+  const logout = async (): Promise<void> => {
+    try {
+      await supabase.auth.signOut();
+      cleanupAuthState();
+      toast.success("Successfully logged out");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("An error occurred during logout");
+    }
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
-      isAuthenticated: !!user, 
+      session,
+      isAuthenticated: !!session, 
+      isLoading,
       login, 
       register,
       logout 
