@@ -92,12 +92,21 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <Link to="/login">
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  Sign In
-                </Button>
-                <User size={20} className="md:hidden" />
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link to="/login" state={{ isRegister: false }}>
+                  <Button variant="outline" size="sm" className="hidden md:flex">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/login" state={{ isRegister: true }}>
+                  <Button variant="default" size="sm" className="hidden md:flex bg-neo-purple hover:bg-neo-purple/90">
+                    Sign Up
+                  </Button>
+                </Link>
+                <Link to="/login" className="md:hidden">
+                  <User size={20} />
+                </Link>
+              </div>
             )}
           </div>
         </div>
