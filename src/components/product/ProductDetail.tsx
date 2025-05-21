@@ -41,6 +41,10 @@ export default function ProductDetail({
     );
   }
 
+  // For demo purposes, consider products with ratings > 4.5 as having all verified reviews
+  // and products with lower ratings as potentially having fake reviews
+  const hasVerifiedReviews = product.rating > 4.5;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <ProductImageDisplay image={product.image} name={product.name} />
@@ -56,7 +60,11 @@ export default function ProductDetail({
           
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
           
-          <ProductRating rating={product.rating} reviews={product.reviews} />
+          <ProductRating 
+            rating={product.rating} 
+            reviews={product.reviews} 
+            verified={hasVerifiedReviews} 
+          />
           
           <ProductPricing price={product.price} discountPrice={product.discountPrice} />
           
