@@ -16,8 +16,7 @@ import {
   CommandGroup, 
   CommandInput, 
   CommandItem, 
-  CommandList, 
-  CommandLoading
+  CommandList
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -98,7 +97,10 @@ export default function SmartSearch() {
           
           <CommandList>
             {isSearching ? (
-              <CommandLoading>Searching product database...</CommandLoading>
+              <div className="py-6 text-center text-sm flex items-center justify-center">
+                <div className="h-5 w-5 border-2 border-neo-purple border-t-transparent rounded-full animate-spin mr-2"></div>
+                Searching product database...
+              </div>
             ) : (
               <>
                 {searchResults.length > 0 && (
