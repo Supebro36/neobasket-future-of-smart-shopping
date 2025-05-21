@@ -8,6 +8,7 @@ import { useCart } from "../contexts/CartContext";
 import ProductGrid from "../components/ProductGrid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, Minus, Plus, Heart } from "lucide-react";
+import ReviewForm from "@/components/ReviewForm";
 
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const { addItem } = useCart();
   
   useEffect(() => {
@@ -24,6 +26,7 @@ export default function ProductDetailPage() {
     setRelatedProducts([]);
     setLoading(true);
     setQuantity(1);
+    setShowReviewForm(false);
     window.scrollTo(0, 0);
     
     // Simulate loading
@@ -195,9 +198,24 @@ export default function ProductDetailPage() {
                 </span>
               </p>
             </div>
+            
+            <Button 
+              variant="outline" 
+              className="mt-6"
+              onClick={() => setShowReviewForm(!showReviewForm)}
+            >
+              {showReviewForm ? "Cancel Review" : "Write a Review"}
+            </Button>
           </div>
         </div>
       </div>
+      
+      {showReviewForm && product && (
+        <ReviewForm 
+          product={product} 
+          onSubmit={() => setShowReviewForm(false)}
+        />
+      )}
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
