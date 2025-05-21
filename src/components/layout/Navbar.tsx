@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -7,6 +6,7 @@ import { useAIAssistant } from "../../contexts/AIAssistantContext";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, MessageSquare, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import SmartSearch from "../SmartSearch";
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -40,7 +40,10 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            {/* Search button */}
+            {/* Smart Search */}
+            <SmartSearch />
+            
+            {/* Regular Search button */}
             <button 
               className="text-gray-600 hover:text-neo-purple"
               onClick={() => setShowSearch(!showSearch)}
