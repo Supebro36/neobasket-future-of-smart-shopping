@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -25,9 +26,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-neo-dark-purple">
-              Neo<span className="text-neo-purple">Basket</span>
-            </span>
+            <img 
+              src="/lovable-uploads/66aa6dde-bf7e-4578-85bf-ee265a00212f.png" 
+              alt="NeoBasket Logo" 
+              className="h-10"
+            />
           </Link>
 
           {/* Desktop Navigation */}
