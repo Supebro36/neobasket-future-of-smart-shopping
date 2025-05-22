@@ -5,7 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 import { useAIAssistant } from "../../contexts/AIAssistantContext";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, MessageSquare, Search, LogOut } from "lucide-react";
+import { ShoppingBasket, User, MessageSquare, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import SmartSearch from "../SmartSearch";
 
@@ -26,11 +26,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/lovable-uploads/66aa6dde-bf7e-4578-85bf-ee265a00212f.png" 
-              alt="NeoBasket Logo" 
-              className="h-10"
-            />
+            <ShoppingBasket className="h-6 w-6 text-neo-purple" />
+            <span className="text-xl font-bold text-neo-dark-purple">
+              Neo<span className="text-neo-purple">Basket</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -66,7 +65,7 @@ export default function Navbar() {
 
             {/* Shopping cart */}
             <Link to="/cart" className="text-gray-600 hover:text-neo-purple relative">
-              <ShoppingCart size={20} />
+              <ShoppingBasket size={20} />
               {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-neo-purple text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {itemCount}
