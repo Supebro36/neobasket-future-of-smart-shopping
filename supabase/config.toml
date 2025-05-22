@@ -3,3 +3,9 @@ project_id = "nlnwvuaidgbbtqvuwocp"
 
 [functions.smart-search]
 verify_jwt = false
+
+[auth]
+enable_signup = true
+dbssl = "require"
+enable_hibp = true  # Enable HaveIBeenPwned password check
+
