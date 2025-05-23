@@ -27,7 +27,6 @@ export default function SmartSearch() {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [explanation, setExplanation] = useState("");
   const navigate = useNavigate();
   
   const handleSearch = async (searchQuery: string) => {
@@ -45,8 +44,7 @@ export default function SmartSearch() {
         throw new Error(error.message);
       }
       
-      setSearchResults(data.products);
-      setExplanation(data.explanation);
+      setSearchResults(data.results);
     } catch (error) {
       console.error("Smart search error:", error);
       toast.error("Search error. Please try again.");
@@ -104,7 +102,7 @@ export default function SmartSearch() {
             ) : (
               <>
                 {searchResults.length > 0 && (
-                  <CommandGroup heading={explanation}>
+                  <CommandGroup>
                     {searchResults.map((product) => (
                       <CommandItem 
                         key={product.id}

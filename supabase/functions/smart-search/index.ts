@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import products from "../../src/data/products.ts";
+import products from "./products.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
