@@ -8,4 +8,3 @@ verify_jwt = false
 enable_signup = true
 dbssl = "require"
 enable_hibp = true  # Enable HaveIBeenPwned password check
-
