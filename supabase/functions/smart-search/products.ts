@@ -27,7 +27,7 @@ const generateSampleProducts = (): Product[] => {
         discountPrice,
         description,
         category,
-        image: `https://picsum.photos/seed/${id}/400/400`,
+        image: getCategoryImage(category, i),
         rating,
         reviews: Math.floor(Math.random() * 500),
         inStock: Math.random() > 0.15,
@@ -44,6 +44,46 @@ const generateSampleProducts = (): Product[] => {
   
   return products;
 };
+
+// Function to get different images for each category
+function getCategoryImage(category: string, index: number): string {
+  // Use a different set of images for each category
+  const imagesByCategory: Record<string, string[]> = {
+    "electronics": [
+      "https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // headphones
+      "https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // laptop
+      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // smartwatch
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02ff9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // phone
+      "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // tablet
+    ],
+    "clothing": [
+      "https://images.unsplash.com/photo-1562157873-818bc0726f68?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // shirt
+      "https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // jeans
+      "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // jacket
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // dress
+      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // sweater
+    ],
+    "home-decor": [
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // lamp
+      "https://images.unsplash.com/photo-1540932239986-30128078f3c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // vase
+      "https://images.unsplash.com/photo-1562663474-6cbb3eaa4d14?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // rug
+      "https://images.unsplash.com/photo-1526657782461-9fe13402a841?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // pillow
+      "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // wall art
+    ],
+    "accessories": [
+      "https://images.unsplash.com/photo-1590548784585-643d2b9f2925?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // watch
+      "https://images.unsplash.com/photo-1591076482161-42ce6da69f67?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // wallet
+      "https://images.unsplash.com/photo-1556306535-0f09a537f0a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // sunglasses
+      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // necklace
+      "https://images.unsplash.com/photo-1611085583191-a3b181a88552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // bag
+    ]
+  };
+  
+  // Use modulo to cycle through the available images
+  const images = imagesByCategory[category];
+  const imageIndex = (index - 1) % images.length;
+  return images[imageIndex];
+}
 
 // Helper functions to generate more varied product data
 function getProductPrefix(category: string): string {
