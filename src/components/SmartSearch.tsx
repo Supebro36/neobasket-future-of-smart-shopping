@@ -19,7 +19,7 @@ import {
   CommandList
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SmartSearch() {
@@ -27,6 +27,7 @@ export default function SmartSearch() {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const handleSearch = async (searchQuery: string) => {
@@ -34,8 +35,11 @@ export default function SmartSearch() {
     
     setIsSearching(true);
     setSearchResults([]);
+    setSearchError(null);
     
     try {
+      console.log("Sending search query:", searchQuery);
+      
       const { data, error } = await supabase.functions.invoke("smart-search", {
         body: { query: searchQuery }
       });
@@ -44,9 +48,20 @@ export default function SmartSearch() {
         throw new Error(error.message);
       }
       
+      console.log("Search results:", data);
+      
+      if (!data || !data.results) {
+        throw new Error("Invalid response format from search function");
+      }
+      
       setSearchResults(data.results);
+      
+      if (data.results.length === 0) {
+        toast.info("No products found matching your search.");
+      }
     } catch (error) {
       console.error("Smart search error:", error);
+      setSearchError("Search failed. Please try again.");
       toast.error("Search error. Please try again.");
     } finally {
       setIsSearching(false);
@@ -101,6 +116,21 @@ export default function SmartSearch() {
               </div>
             ) : (
               <>
+                {searchError && (
+                  <div className="py-6 text-center text-sm flex flex-col items-center justify-center text-red-500 gap-2">
+                    <AlertCircle size={24} />
+                    <p>{searchError}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleSearch(query)}
+                      className="mt-2"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                )}
+                
                 {searchResults.length > 0 && (
                   <CommandGroup>
                     {searchResults.map((product) => (
@@ -113,6 +143,9 @@ export default function SmartSearch() {
                           src={product.image} 
                           alt={product.name} 
                           className="w-10 h-10 object-cover rounded"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/placeholder.svg";
+                          }}
                         />
                         <div>
                           <p className="font-medium">{product.name}</p>
@@ -128,7 +161,7 @@ export default function SmartSearch() {
                   </CommandGroup>
                 )}
                 
-                {query && searchResults.length === 0 && !isSearching && (
+                {query && searchResults.length === 0 && !isSearching && !searchError && (
                   <CommandEmpty>No products found matching your search.</CommandEmpty>
                 )}
               </>

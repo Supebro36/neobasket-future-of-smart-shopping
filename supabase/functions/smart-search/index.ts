@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import products from "./products.ts";
+import { Product } from "./types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,20 @@ serve(async (req) => {
     console.log(`Processing search query: "${query}"\n`);
 
     if (!query || query.length < 2) {
+      return new Response(
+        JSON.stringify({ results: [] }),
+        { 
+          headers: { 
+            "Content-Type": "application/json", 
+            ...corsHeaders 
+          } 
+        }
+      );
+    }
+
+    // Ensure products array is defined before using it
+    if (!Array.isArray(products) || products.length === 0) {
+      console.log("Warning: Products array is empty or undefined");
       return new Response(
         JSON.stringify({ results: [] }),
         { 
@@ -57,8 +72,8 @@ serve(async (req) => {
   }
 });
 
-function enhancedSmartSearch(query: string) {
-  if (!products || products.length === 0) {
+function enhancedSmartSearch(query: string): Product[] {
+  if (!Array.isArray(products) || products.length === 0) {
     return [];
   }
   
