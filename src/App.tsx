@@ -15,6 +15,10 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
+import FAQPage from "./pages/FAQPage";
+import ShippingPage from "./pages/ShippingPage";
+import ReturnsPage from "./pages/ReturnsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const App = () => {
@@ -37,6 +41,10 @@ const App = () => {
                     <Route path="/product/:productId" element={<ProductDetailPage />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/faq" element={<FAQPage />} />
+                    <Route path="/shipping" element={<ShippingPage />} />
+                    <Route path="/returns" element={<ReturnsPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
                 </Routes>
