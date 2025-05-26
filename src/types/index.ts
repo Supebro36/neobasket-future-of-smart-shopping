@@ -1,4 +1,6 @@
 
+import { DatabaseProduct, DatabaseSeller } from './database';
+
 export interface Product {
   id: string;
   name: string;
@@ -48,3 +50,28 @@ export interface AIChatMessage {
   message: string;
   timestamp: Date;
 }
+
+// Helper functions to convert between database and frontend types
+export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { sellers?: DatabaseSeller }): Product {
+  return {
+    id: dbProduct.product_id,
+    name: dbProduct.name,
+    price: dbProduct.price,
+    description: dbProduct.description || '',
+    category: dbProduct.category as Category,
+    image: dbProduct.image_url || '/placeholder.svg',
+    rating: 4.5, // Default rating - you can calculate this from reviews later
+    reviews: 0, // Default reviews count
+    inStock: dbProduct.stock_quantity > 0,
+    tags: [dbProduct.category], // Default tags
+    seller: {
+      id: dbProduct.sellers?.seller_id || '',
+      name: dbProduct.sellers?.business_name || dbProduct.sellers?.name || '',
+      rating: 4.5, // Default seller rating
+      verified: dbProduct.sellers?.verification_status === 'Verified'
+    }
+  };
+}
+
+// Re-export database types for convenience
+export * from './database';

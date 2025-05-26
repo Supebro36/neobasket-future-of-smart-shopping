@@ -12,6 +12,7 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
+  createOrder: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -81,6 +82,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast.info("Cart cleared");
   };
 
+  const createOrder = async () => {
+    if (!user) {
+      toast.error("Please log in to place an order");
+      return;
+    }
+
+    if (items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    try {
+      // Import DatabaseService dynamically to avoid circular dependencies
+      const { DatabaseService } = await import("../services/databaseService");
+      
+      const orderData = {
+        user_id: user.id,
+        total_amount: subtotal,
+        items: items.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+          unit_price: item.product.discountPrice || item.product.price,
+        })),
+      };
+
+      await DatabaseService.createOrder(orderData);
+      clearCart();
+      toast.success("Order placed successfully!");
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      toast.error("Failed to place order. Please try again.");
+    }
+  };
+
   const itemCount = items.reduce((count, item) => count + item.quantity, 0);
   
   const subtotal = items.reduce(
@@ -96,7 +131,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateQuantity,
       clearCart,
       itemCount,
-      subtotal
+      subtotal,
+      createOrder
     }}>
       {children}
     </CartContext.Provider>
