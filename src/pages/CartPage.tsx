@@ -4,20 +4,15 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCart } from "../contexts/CartContext";
 import { ShoppingCart, ArrowRight, Trash2, Minus, Plus } from "lucide-react";
+import PaymentGateway from "@/components/payment/PaymentGateway";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, itemCount, subtotal, clearCart } = useCart();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-    // Simulate checkout process
-    setTimeout(() => {
-      clearCart();
-      setIsCheckingOut(false);
-      // In a real app, would redirect to order confirmation
-      alert("Thank you for your order! This is just a demo so no actual purchase was made.");
-    }, 2000);
+  const handlePaymentSuccess = () => {
+    // Payment success is handled in the PaymentGateway component
+    console.log("Payment completed successfully");
   };
   
   if (items.length === 0) {
@@ -81,10 +76,10 @@ export default function CartPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        ${price.toFixed(2)}
+                        ₹{price.toFixed(2)}
                         {product.discountPrice && (
                           <span className="block text-xs text-gray-500 line-through">
-                            ${product.price.toFixed(2)}
+                            ₹{product.price.toFixed(2)}
                           </span>
                         )}
                       </td>
@@ -113,7 +108,7 @@ export default function CartPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4 font-medium">
-                        ${itemTotal.toFixed(2)}
+                        ₹{itemTotal.toFixed(2)}
                       </td>
                       <td className="px-4 py-4">
                         <button
@@ -154,45 +149,85 @@ export default function CartPage() {
             <div className="space-y-2 text-sm mb-4">
               <div className="flex justify-between py-2">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               
               <div className="flex justify-between py-2">
                 <span>Shipping</span>
-                <span>Calculated at checkout</span>
+                <span className="text-green-600">Free</span>
               </div>
               
               <div className="flex justify-between py-2">
                 <span>Tax</span>
-                <span>Calculated at checkout</span>
+                <span>Included</span>
               </div>
             </div>
             
             <div className="border-t pt-4 mb-6">
               <div className="flex justify-between font-bold">
                 <span>Total</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
             </div>
             
             <Button 
               className="w-full bg-neo-purple hover:bg-neo-purple/90 mb-4"
-              disabled={isCheckingOut}
-              onClick={handleCheckout}
+              onClick={() => setIsPaymentOpen(true)}
             >
-              {isCheckingOut ? (
-                <>Processing...</>
-              ) : (
-                <>Proceed to Checkout <ArrowRight size={16} className="ml-2" /></>
-              )}
+              Proceed to Checkout <ArrowRight size={16} className="ml-2" />
             </Button>
             
-            <p className="text-xs text-gray-500 text-center">
-              Secure checkout powered by NeoBasket. This is a demo and no actual purchase will be made.
-            </p>
+            <div className="space-y-2 text-xs text-gray-500">
+              <p className="text-center">
+                Secure checkout powered by NeoBasket
+              </p>
+              <div className="flex justify-center space-x-2">
+                <span>🔒 SSL Encrypted</span>
+                <span>💳 All Cards Accepted</span>
+                <span>📱 UPI Enabled</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Payment Methods */}
+          <div className="border rounded-lg p-4 mt-4">
+            <h3 className="font-medium mb-3">We Accept</h3>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center space-x-1">
+                <span>💳</span>
+                <span>Credit/Debit Cards</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>📱</span>
+                <span>UPI Payments</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>💰</span>
+                <span>Digital Wallets</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>🏦</span>
+                <span>Net Banking</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>🚚</span>
+                <span>Cash on Delivery</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>🔒</span>
+                <span>100% Secure</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Payment Gateway Dialog */}
+      <PaymentGateway 
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }

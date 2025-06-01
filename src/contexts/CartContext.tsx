@@ -12,7 +12,7 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
-  createOrder: () => Promise<void>;
+  createOrder: (paymentMethod?: string) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -82,7 +82,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast.info("Cart cleared");
   };
 
-  const createOrder = async () => {
+  const createOrder = async (paymentMethod = "card") => {
     if (!user) {
       toast.error("Please log in to place an order");
       return;
@@ -105,6 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           quantity: item.quantity,
           unit_price: item.product.discountPrice || item.product.price,
         })),
+        payment_method: paymentMethod,
       };
 
       await DatabaseService.createOrder(orderData);
