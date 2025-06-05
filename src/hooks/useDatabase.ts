@@ -6,12 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export function useCurrentUser() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   return useQuery({
     queryKey: ['currentUser', user?.id],
     queryFn: DatabaseService.getCurrentUser,
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
   });
 }
 
@@ -31,27 +31,28 @@ export function useProduct(productId: string) {
 }
 
 export function useUserOrders() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   return useQuery({
     queryKey: ['userOrders', user?.id],
     queryFn: () => DatabaseService.getUserOrders(user!.id),
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
   });
 }
 
 export function useUserWatchlist() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   return useQuery({
     queryKey: ['userWatchlist', user?.id],
     queryFn: () => DatabaseService.getUserWatchlist(user!.id),
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
   });
 }
 
 export function useCreateOrder() {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
   
   return useMutation({
     mutationFn: DatabaseService.createOrder,
@@ -61,13 +62,18 @@ export function useCreateOrder() {
     },
     onError: (error) => {
       console.error('Failed to create order:', error);
-      toast.error('Failed to create order. Please try again.');
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        toast.error('Please log in to place an order');
+      } else {
+        toast.error('Failed to create order. Please try again.');
+      }
     },
   });
 }
 
 export function useAddToWatchlist() {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
   
   return useMutation({
     mutationFn: ({ userId, productId, targetPrice }: { userId: string; productId: string; targetPrice?: number }) =>
@@ -78,13 +84,18 @@ export function useAddToWatchlist() {
     },
     onError: (error) => {
       console.error('Failed to add to watchlist:', error);
-      toast.error('Failed to add to watchlist. Please try again.');
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        toast.error('Please log in to manage your watchlist');
+      } else {
+        toast.error('Failed to add to watchlist. Please try again.');
+      }
     },
   });
 }
 
 export function useRemoveFromWatchlist() {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
   
   return useMutation({
     mutationFn: ({ userId, productId }: { userId: string; productId: string }) =>
@@ -95,7 +106,11 @@ export function useRemoveFromWatchlist() {
     },
     onError: (error) => {
       console.error('Failed to remove from watchlist:', error);
-      toast.error('Failed to remove from watchlist. Please try again.');
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        toast.error('Please log in to manage your watchlist');
+      } else {
+        toast.error('Failed to remove from watchlist. Please try again.');
+      }
     },
   });
 }

@@ -59,6 +59,7 @@ export type Database = {
           created_at: string | null
           order_date: string | null
           order_id: string
+          payment_status: string | null
           shipping_address: Json | null
           status: Database["public"]["Enums"]["order_status"] | null
           total_amount: number
@@ -69,6 +70,7 @@ export type Database = {
           created_at?: string | null
           order_date?: string | null
           order_id?: string
+          payment_status?: string | null
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"] | null
           total_amount: number
@@ -79,6 +81,7 @@ export type Database = {
           created_at?: string | null
           order_date?: string | null
           order_id?: string
+          payment_status?: string | null
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"] | null
           total_amount?: number
@@ -373,7 +376,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_order_payment: {
+        Args: { order_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       order_status: "Pending" | "Shipped" | "Delivered" | "Cancelled"

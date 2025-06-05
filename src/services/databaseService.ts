@@ -22,6 +22,25 @@ export class DatabaseService {
     return data;
   }
 
+  static async createUserProfile(userId: string, name: string, email: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        user_id: userId,
+        name: name,
+        email: email
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
   static async updateUserProfile(userId: string, updates: Partial<DatabaseUser>) {
     const { data, error } = await supabase
       .from('users')
@@ -107,13 +126,21 @@ export class DatabaseService {
       quantity: number;
       unit_price: number;
     }>;
+    payment_method?: string;
   }) {
+    // Verify user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== orderData.user_id) {
+      throw new Error('Unauthorized: User must be logged in to create orders');
+    }
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: orderData.user_id,
         total_amount: orderData.total_amount,
         shipping_address: orderData.shipping_address,
+        payment_status: 'pending'
       })
       .select()
       .single();
@@ -141,10 +168,33 @@ export class DatabaseService {
       throw itemsError;
     }
 
+    // Create payment record if payment method is provided
+    if (orderData.payment_method) {
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          order_id: order.order_id,
+          payment_method: orderData.payment_method as any,
+          amount: orderData.total_amount,
+          payment_status: 'Pending'
+        });
+
+      if (paymentError) {
+        console.error('Error creating payment record:', paymentError);
+        // Don't throw here as order was created successfully
+      }
+    }
+
     return order;
   }
 
   static async getUserOrders(userId: string) {
+    // Verify user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) {
+      throw new Error('Unauthorized: Can only access own orders');
+    }
+
     const { data, error } = await supabase
       .from('orders')
       .select(`
@@ -176,6 +226,12 @@ export class DatabaseService {
 
   // Watchlist operations
   static async addToWatchlist(userId: string, productId: string, targetPrice?: number) {
+    // Verify user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) {
+      throw new Error('Unauthorized: Can only manage own watchlist');
+    }
+
     const { data, error } = await supabase
       .from('watchlists')
       .insert({
@@ -195,6 +251,12 @@ export class DatabaseService {
   }
 
   static async removeFromWatchlist(userId: string, productId: string) {
+    // Verify user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) {
+      throw new Error('Unauthorized: Can only manage own watchlist');
+    }
+
     const { error } = await supabase
       .from('watchlists')
       .delete()
@@ -208,6 +270,12 @@ export class DatabaseService {
   }
 
   static async getUserWatchlist(userId: string) {
+    // Verify user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) {
+      throw new Error('Unauthorized: Can only access own watchlist');
+    }
+
     const { data, error } = await supabase
       .from('watchlists')
       .select(`

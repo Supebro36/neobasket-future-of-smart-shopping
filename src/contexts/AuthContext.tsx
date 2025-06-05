@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Session } from "@supabase/supabase-js";
@@ -27,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         setSession(currentSession);
         if (currentSession?.user) {
           const appUser: AppUser = {
@@ -38,6 +37,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             cart: []
           };
           setUser(appUser);
+          
+          // Create user profile in database if it doesn't exist
+          try {
+            const { DatabaseService } = await import("../services/databaseService");
+            const existingUser = await DatabaseService.getCurrentUser();
+            
+            if (!existingUser) {
+              await DatabaseService.createUserProfile(
+                currentSession.user.id,
+                appUser.name,
+                appUser.email
+              );
+            }
+          } catch (error) {
+            console.error("Error handling user profile:", error);
+          }
           
           // Update local storage with user data
           localStorage.setItem("neobasket-user", JSON.stringify(appUser));

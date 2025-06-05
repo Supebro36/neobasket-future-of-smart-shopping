@@ -19,7 +19,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   // Load cart from localStorage on initial load
   useEffect(() => {
@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createOrder = async (paymentMethod = "card") => {
-    if (!user) {
+    if (!isAuthenticated || !user) {
       toast.error("Please log in to place an order");
       return;
     }
@@ -113,7 +113,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success("Order placed successfully!");
     } catch (error) {
       console.error("Failed to create order:", error);
-      toast.error("Failed to place order. Please try again.");
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        toast.error("Please log in to place an order");
+      } else {
+        toast.error("Failed to place order. Please try again.");
+      }
     }
   };
 
