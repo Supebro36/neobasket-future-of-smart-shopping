@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Product } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { SearchService } from "@/services";
 import { 
   Dialog, 
   DialogContent, 
@@ -25,52 +25,28 @@ import { toast } from "sonner";
 export default function SmartSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const navigate = useNavigate();
   
-  const handleSearch = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
-    
-    setIsSearching(true);
-    setSearchResults([]);
-    setSearchError(null);
-    
-    try {
-      console.log("Sending search query:", searchQuery);
-      
-      const { data, error } = await supabase.functions.invoke("smart-search", {
-        body: { query: searchQuery }
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      console.log("Search results:", data);
-      
-      if (!data || !data.results) {
-        throw new Error("Invalid response format from search function");
-      }
-      
-      setSearchResults(data.results);
-      
-      if (data.results.length === 0) {
-        toast.info("No products found matching your search.");
-      }
-    } catch (error) {
-      console.error("Smart search error:", error);
-      setSearchError("Search failed. Please try again.");
-      toast.error("Search error. Please try again.");
-    } finally {
-      setIsSearching(false);
-    }
-  };
+  // Use React Query to search products from the database
+  const { data: searchResults = [], isLoading, error } = useQuery({
+    queryKey: ['smartSearch', query],
+    queryFn: () => SearchService.searchProducts(query),
+    enabled: query.length >= 2, // Only search when query has at least 2 characters
+    staleTime: 30000, // Cache results for 30 seconds
+  });
   
   const handleProductSelect = (productId: string) => {
     navigate(`/product/${productId}`);
     setOpen(false);
+    setQuery("");
+  };
+  
+  const handleSearch = () => {
+    if (query.length < 2) {
+      toast.info("Please enter at least 2 characters to search");
+      return;
+    }
+    // The search will be triggered automatically by React Query
   };
   
   return (
@@ -91,39 +67,39 @@ export default function SmartSearch() {
         </DialogHeader>
         <Command className="rounded-lg border shadow-md">
           <CommandInput 
-            placeholder="Search with natural language..." 
+            placeholder="Search products by name, category, or description..." 
             value={query}
             onValueChange={setQuery}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSearch(query);
+                handleSearch();
               }
             }}
           />
           <Button 
             className="mx-3 mt-2 bg-neo-purple hover:bg-neo-purple/90" 
-            onClick={() => handleSearch(query)}
-            disabled={isSearching || !query.trim()}
+            onClick={handleSearch}
+            disabled={isLoading || query.length < 2}
           >
-            {isSearching ? "Searching..." : "Search"}
+            {isLoading ? "Searching..." : "Search"}
           </Button>
           
           <CommandList>
-            {isSearching ? (
+            {isLoading ? (
               <div className="py-6 text-center text-sm flex items-center justify-center">
                 <div className="h-5 w-5 border-2 border-neo-purple border-t-transparent rounded-full animate-spin mr-2"></div>
                 Searching product database...
               </div>
             ) : (
               <>
-                {searchError && (
+                {error && (
                   <div className="py-6 text-center text-sm flex flex-col items-center justify-center text-red-500 gap-2">
                     <AlertCircle size={24} />
-                    <p>{searchError}</p>
+                    <p>Search failed. Please try again.</p>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleSearch(query)}
+                      onClick={handleSearch}
                       className="mt-2"
                     >
                       Try Again
@@ -135,34 +111,38 @@ export default function SmartSearch() {
                   <CommandGroup>
                     {searchResults.map((product) => (
                       <CommandItem 
-                        key={product.id}
-                        onSelect={() => handleProductSelect(product.id)}
+                        key={product.product_id}
+                        onSelect={() => handleProductSelect(product.product_id)}
                         className="flex items-center gap-2 py-3 cursor-pointer"
                       >
                         <img 
-                          src={product.image} 
+                          src={product.image_url || "/placeholder.svg"} 
                           alt={product.name} 
                           className="w-10 h-10 object-cover rounded"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/placeholder.svg";
                           }}
                         />
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-gray-500">
-                            ${product.discountPrice || product.price}
-                            {product.discountPrice && (
-                              <span className="line-through ml-1 text-xs">${product.price}</span>
-                            )}
+                            ${product.price}
                           </p>
+                          <p className="text-xs text-gray-400 capitalize">{product.category}</p>
                         </div>
                       </CommandItem>
                     ))}
                   </CommandGroup>
                 )}
                 
-                {query && searchResults.length === 0 && !isSearching && !searchError && (
+                {query.length >= 2 && searchResults.length === 0 && !isLoading && !error && (
                   <CommandEmpty>No products found matching your search.</CommandEmpty>
+                )}
+                
+                {query.length < 2 && (
+                  <div className="py-6 text-center text-sm text-gray-500">
+                    Enter at least 2 characters to start searching
+                  </div>
                 )}
               </>
             )}
