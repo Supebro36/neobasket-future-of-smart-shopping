@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "../types";
 import { useAuth } from "./AuthContext";
@@ -94,8 +93,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Import DatabaseService dynamically to avoid circular dependencies
-      const { DatabaseService } = await import("../services/databaseService");
+      // Import DatabaseService from the new location
+      const { DatabaseService } = await import("../services");
       
       const orderData = {
         user_id: user.id,

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Session } from "@supabase/supabase-js";
@@ -40,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Create user profile in database if it doesn't exist
           try {
-            const { DatabaseService } = await import("../services/databaseService");
+            const { DatabaseService } = await import("../services");
             const existingUser = await DatabaseService.getCurrentUser();
             
             if (!existingUser) {
