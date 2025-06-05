@@ -12,6 +12,8 @@ import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import ProductsPage from "./pages/ProductsPage";
+import SellersPage from "./pages/SellersPage";
 import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
@@ -41,6 +43,8 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/sellers" element={<SellersPage />} />
                     <Route path="/category/:categoryId" element={<CategoryPage />} />
                     <Route path="/product/:productId" element={<ProductDetailPage />} />
                     <Route path="/cart" element={<CartPage />} />

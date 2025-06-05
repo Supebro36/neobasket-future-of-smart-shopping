@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import ProductGrid from "../components/ProductGrid";
 import { useProducts } from "../hooks/useDatabase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { convertDatabaseProductToProduct } from "../types";
+import { convertDatabaseProductToProduct, Product } from "../types";
 
 export default function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -13,7 +13,7 @@ export default function CategoryPage() {
   const { data: dbProducts = [], isLoading, error } = useProducts(categoryId);
   
   // Convert database products to frontend Product type
-  const products = dbProducts.map(convertDatabaseProductToProduct);
+  const products: Product[] = dbProducts.map((dbProduct: any) => convertDatabaseProductToProduct(dbProduct));
   
   // Format category name for display
   const formatCategoryName = (category: string) => {

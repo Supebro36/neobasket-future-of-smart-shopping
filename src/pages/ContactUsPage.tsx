@@ -1,11 +1,37 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ContactUsPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would send the message to your backend
+    toast.success("Message sent successfully! We'll get back to you within 24 hours.");
+    setFormData({ name: "", email: "", subject: "", message: "" });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   return (
     <div className="neo-container py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-neo-dark-purple mb-4">
             Contact Us
@@ -15,7 +41,66 @@ export default function ContactUsPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Contact Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-neo-dark-purple">Send us a Message</CardTitle>
+              <CardDescription>Fill out the form below and we'll get back to you soon</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="subject">Subject</Label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-neo-purple hover:bg-neo-purple/90">
+                  Send Message
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
           {/* Contact Information */}
           <Card>
             <CardHeader>
@@ -50,16 +135,29 @@ export default function ContactUsPage() {
                   West Bengal, India
                 </p>
               </div>
+
+              <div>
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <span className="text-xl">🕒</span> Business Hours
+                </h4>
+                <p className="text-gray-700">
+                  Monday - Friday: 9:00 AM - 6:00 PM IST<br />
+                  Saturday: 10:00 AM - 4:00 PM IST<br />
+                  Sunday: Closed
+                </p>
+              </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Social Media */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-neo-dark-purple">Follow Us</CardTitle>
-              <CardDescription>Stay connected on social media</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Social Media */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-neo-dark-purple">Follow Us</CardTitle>
+            <CardDescription>Stay connected on social media</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">f</span>
@@ -99,9 +197,9 @@ export default function ContactUsPage() {
                   <p className="text-sm text-gray-600">@neobasket-technologies</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Department-specific Contacts */}
         <Card className="mb-8">
