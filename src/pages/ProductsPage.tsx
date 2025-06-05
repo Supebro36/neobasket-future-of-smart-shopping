@@ -7,16 +7,16 @@ import { convertDatabaseProductToProduct, Product } from "../types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function ProductsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
   // Use the database hook to fetch all products or by category
-  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory || undefined, 50);
+  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, 50);
   
   // Convert database products to frontend Product type
   const products: Product[] = dbProducts.map((dbProduct: any) => convertDatabaseProductToProduct(dbProduct));
   
   const categories = [
-    { value: "", label: "All Categories" },
+    { value: "all", label: "All Categories" },
     { value: "electronics", label: "Electronics" },
     { value: "clothing", label: "Clothing" },
     { value: "home-decor", label: "Home Decor" },
