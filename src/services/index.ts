@@ -7,6 +7,14 @@ export { WatchlistService } from './watchlistService';
 export { SearchService } from './searchService';
 export { PriceHistoryService } from './priceHistoryService';
 
+// Import all services for the legacy DatabaseService
+import { UserService } from './userService';
+import { ProductService } from './productService';
+import { OrderService } from './orderService';
+import { WatchlistService } from './watchlistService';
+import { SearchService } from './searchService';
+import { PriceHistoryService } from './priceHistoryService';
+
 // Legacy DatabaseService class that delegates to the new services
 // This maintains backward compatibility while we transition
 export class DatabaseService {
