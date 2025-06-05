@@ -12,9 +12,19 @@ export default function CategoryPage() {
   // Use the database hook to fetch products by category
   const { data: dbProducts = [], isLoading, error } = useProducts(categoryId);
   
-  // Convert database products to frontend Product type
-  const products: Product[] = dbProducts.map((dbProduct: any) => convertDatabaseProductToProduct(dbProduct));
+  console.log('CategoryPage - categoryId:', categoryId);
+  console.log('CategoryPage - dbProducts:', dbProducts);
+  console.log('CategoryPage - isLoading:', isLoading);
+  console.log('CategoryPage - error:', error);
   
+  // Convert database products to frontend Product type
+  const products: Product[] = dbProducts.map((dbProduct: any) => {
+    console.log('Converting product:', dbProduct);
+    return convertDatabaseProductToProduct(dbProduct);
+  });
+  
+  console.log('CategoryPage - converted products:', products);
+
   // Format category name for display
   const formatCategoryName = (category: string) => {
     return category
@@ -26,11 +36,13 @@ export default function CategoryPage() {
   const categoryName = categoryId ? formatCategoryName(categoryId) : "";
   
   if (error) {
+    console.error('CategoryPage error:', error);
     return (
       <div className="neo-container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Products</h1>
           <p className="text-gray-600">Failed to load products for this category. Please try again later.</p>
+          <p className="text-sm text-gray-500 mt-2">Error: {error?.message || 'Unknown error'}</p>
         </div>
       </div>
     );

@@ -53,7 +53,14 @@ export interface AIChatMessage {
 
 // Helper functions to convert between database and frontend types
 export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { sellers?: DatabaseSeller }): Product {
-  return {
+  console.log('Converting database product:', dbProduct);
+  
+  if (!dbProduct) {
+    console.error('No product data to convert');
+    throw new Error('No product data provided');
+  }
+
+  const converted = {
     id: dbProduct.product_id,
     name: dbProduct.name,
     price: dbProduct.price,
@@ -66,11 +73,14 @@ export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { s
     tags: [dbProduct.category], // Default tags
     seller: {
       id: dbProduct.sellers?.seller_id || '',
-      name: dbProduct.sellers?.business_name || dbProduct.sellers?.name || '',
+      name: dbProduct.sellers?.business_name || dbProduct.sellers?.name || 'Unknown Seller',
       rating: 4.5, // Default seller rating
       verified: dbProduct.sellers?.verification_status === 'Verified'
     }
   };
+  
+  console.log('Converted product:', converted);
+  return converted;
 }
 
 // Re-export database types for convenience
