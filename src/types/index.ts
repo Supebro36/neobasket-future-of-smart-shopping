@@ -67,7 +67,7 @@ export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { s
     price: dbProduct.price,
     description: dbProduct.description || '',
     category: dbProduct.category as Category,
-    image: dbProduct.image_url || '/placeholder.svg', // Fixed: using correct field name from database
+    image: dbProduct.image_Url || '/placeholder.svg', // Fixed: using correct field name from database
     rating: 4.5, // Default rating - you can calculate this from reviews later
     reviews: 0, // Default reviews count
     inStock: dbProduct.stock_quantity > 0,
