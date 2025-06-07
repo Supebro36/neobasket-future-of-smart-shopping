@@ -180,7 +180,7 @@ export type Database = {
           category: string
           created_at: string | null
           description: string | null
-          image_url: string | null
+          image_Url: string | null
           is_active: boolean | null
           name: string
           price: number
@@ -194,7 +194,7 @@ export type Database = {
           category: string
           created_at?: string | null
           description?: string | null
-          image_url?: string | null
+          image_Url?: string | null
           is_active?: boolean | null
           name: string
           price: number
@@ -208,7 +208,7 @@ export type Database = {
           category?: string
           created_at?: string | null
           description?: string | null
-          image_url?: string | null
+          image_Url?: string | null
           is_active?: boolean | null
           name?: string
           price?: number
@@ -256,11 +256,11 @@ export type Database = {
       }
       sellers: {
         Row: {
-          address: Json | null
+          address: string | null
           approved: boolean | null
           business_name: string
           created_at: string | null
-          document_links: string[] | null
+          document_link: string[] | null
           email: string
           name: string
           seller_id: string
@@ -270,11 +270,11 @@ export type Database = {
             | null
         }
         Insert: {
-          address?: Json | null
+          address?: string | null
           approved?: boolean | null
           business_name: string
           created_at?: string | null
-          document_links?: string[] | null
+          document_link?: string[] | null
           email: string
           name: string
           seller_id?: string
@@ -284,11 +284,11 @@ export type Database = {
             | null
         }
         Update: {
-          address?: Json | null
+          address?: string | null
           approved?: boolean | null
           business_name?: string
           created_at?: string | null
-          document_links?: string[] | null
+          document_link?: string[] | null
           email?: string
           name?: string
           seller_id?: string

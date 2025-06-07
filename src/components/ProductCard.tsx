@@ -65,11 +65,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="flex items-center">
               {hasDiscount ? (
                 <>
-                  <span className="font-bold text-gray-900">${product.discountPrice!.toFixed(2)}</span>
-                  <span className="ml-2 text-xs text-gray-500 line-through">${product.price.toFixed(2)}</span>
+                  <span className="font-bold text-gray-900">₹{product.discountPrice!.toFixed(2)}</span>
+                  <span className="ml-2 text-xs text-gray-500 line-through">₹{product.price.toFixed(2)}</span>
                 </>
               ) : (
-                <span className="font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                <span className="font-bold text-gray-900">₹{product.price.toFixed(2)}</span>
               )}
             </div>
           </div>
