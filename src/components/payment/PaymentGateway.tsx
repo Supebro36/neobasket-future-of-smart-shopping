@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ interface PaymentGatewayProps {
 
 export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: PaymentGatewayProps) {
   const [paymentMethod, setPaymentMethod] = useState<string>("upi");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [cardDetails, setCardDetails] = useState({
     number: "",
     expiry: "",
@@ -25,7 +24,13 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
     name: ""
   });
   const [upiId, setUpiId] = useState("");
-  const { subtotal, clearCart } = useCart();
+  const [shippingAddress, setShippingAddress] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zipCode: ""
+  });
+  const { subtotal, createOrder, isCreatingOrder } = useCart();
 
   const paymentMethods = [
     { id: "upi", name: "UPI", icon: Smartphone, description: "Pay using UPI apps like GPay, PhonePe, Paytm" },
@@ -36,25 +41,20 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
   ];
 
   const handlePayment = async () => {
-    setIsProcessing(true);
+    console.log("Processing payment with method:", paymentMethod);
+    console.log("Shipping address:", shippingAddress);
     
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create order in database
+      const success = await createOrder(paymentMethod, shippingAddress);
       
-      if (paymentMethod === "cod") {
-        toast.success("Order placed successfully! You can pay when the order arrives.");
-      } else {
-        toast.success("Payment successful! Your order has been placed.");
+      if (success) {
+        onPaymentSuccess();
+        onClose();
       }
-      
-      clearCart();
-      onPaymentSuccess();
-      onClose();
     } catch (error) {
+      console.error("Payment processing failed:", error);
       toast.error("Payment failed. Please try again.");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -208,6 +208,51 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
         </DialogHeader>
         
         <div className="space-y-6">
+          {/* Shipping Address */}
+          <div>
+            <h3 className="font-medium mb-4">Shipping Address</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="street">Street Address</Label>
+                <Input
+                  id="street"
+                  placeholder="Enter your street address"
+                  value={shippingAddress.street}
+                  onChange={(e) => setShippingAddress(prev => ({ ...prev, street: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    placeholder="City"
+                    value={shippingAddress.city}
+                    onChange={(e) => setShippingAddress(prev => ({ ...prev, city: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    placeholder="State"
+                    value={shippingAddress.state}
+                    onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Input
+                  id="zipCode"
+                  placeholder="ZIP Code"
+                  value={shippingAddress.zipCode}
+                  onChange={(e) => setShippingAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Order Summary */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-medium mb-2">Order Summary</h3>
@@ -261,16 +306,16 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
 
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+            <Button variant="outline" onClick={onClose} className="flex-1" disabled={isCreatingOrder}>
               Cancel
             </Button>
             <Button 
               onClick={handlePayment} 
-              disabled={isProcessing}
+              disabled={isCreatingOrder}
               className="flex-1 bg-neo-purple hover:bg-neo-purple/90"
             >
-              {isProcessing ? (
-                <>Processing...</>
+              {isCreatingOrder ? (
+                <>Creating Order...</>
               ) : (
                 <>
                   {paymentMethod === "cod" ? "Place Order" : `Pay ₹${getTotalAmount().toFixed(2)}`}

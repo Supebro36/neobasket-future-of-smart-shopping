@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "../types";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
+import { DatabaseService } from "@/services";
 
 interface CartContextType {
   items: CartItem[];
@@ -11,13 +13,15 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
-  createOrder: (paymentMethod?: string) => Promise<void>;
+  createOrder: (paymentMethod?: string, shippingAddress?: any) => Promise<boolean>;
+  isCreatingOrder: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const { user, isAuthenticated } = useAuth();
   
   // Load cart from localStorage on initial load
@@ -39,7 +43,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   
   // Sync with user cart if logged in
   useEffect(() => {
-    if (user && user.cart.length > 0 && items.length === 0) {
+    if (user && user.cart && user.cart.length > 0 && items.length === 0) {
       setItems(user.cart);
     }
   }, [user]);
@@ -78,27 +82,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    localStorage.removeItem("neobasket-cart");
     toast.info("Cart cleared");
   };
 
-  const createOrder = async (paymentMethod = "card") => {
+  const createOrder = async (paymentMethod = "card", shippingAddress?: any): Promise<boolean> => {
     if (!isAuthenticated || !user) {
       toast.error("Please log in to place an order");
-      return;
+      return false;
     }
 
     if (items.length === 0) {
       toast.error("Your cart is empty");
-      return;
+      return false;
     }
 
+    setIsCreatingOrder(true);
+
     try {
-      // Import DatabaseService from the new location
-      const { DatabaseService } = await import("../services");
+      console.log("Creating order for user:", user.id);
+      console.log("Cart items:", items);
       
+      // Calculate total amount including COD charges if applicable
+      const baseAmount = subtotal;
+      const codCharge = paymentMethod === "cod" ? 40 : 0;
+      const totalAmount = baseAmount + codCharge;
+
+      // Prepare order data
       const orderData = {
         user_id: user.id,
-        total_amount: subtotal,
+        total_amount: totalAmount,
+        shipping_address: shippingAddress || {
+          street: "Default Address",
+          city: "Default City",
+          state: "Default State",
+          zipCode: "000000"
+        },
         items: items.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity,
@@ -107,16 +126,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         payment_method: paymentMethod,
       };
 
-      await DatabaseService.createOrder(orderData);
+      console.log("Order data prepared:", orderData);
+
+      // Create order in database
+      const order = await DatabaseService.createOrder(orderData);
+      console.log("Order created successfully:", order);
+
+      // Clear cart after successful order creation
       clearCart();
-      toast.success("Order placed successfully!");
+      
+      // Show success message
+      if (paymentMethod === "cod") {
+        toast.success("Order placed successfully! You can pay when the order arrives.");
+      } else {
+        toast.success("Order placed successfully!");
+      }
+
+      return true;
     } catch (error) {
       console.error("Failed to create order:", error);
-      if (error instanceof Error && error.message.includes('Unauthorized')) {
-        toast.error("Please log in to place an order");
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Unauthorized')) {
+          toast.error("Please log in to place an order");
+        } else {
+          toast.error(`Failed to place order: ${error.message}`);
+        }
       } else {
         toast.error("Failed to place order. Please try again.");
       }
+      
+      return false;
+    } finally {
+      setIsCreatingOrder(false);
     }
   };
 
@@ -136,7 +178,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       itemCount,
       subtotal,
-      createOrder
+      createOrder,
+      isCreatingOrder
     }}>
       {children}
     </CartContext.Provider>

@@ -11,7 +11,6 @@ export default function CartPage() {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   
   const handlePaymentSuccess = () => {
-    // Payment success is handled in the PaymentGateway component
     console.log("Payment completed successfully");
   };
   
