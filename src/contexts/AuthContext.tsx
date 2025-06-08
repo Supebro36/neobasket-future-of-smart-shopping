@@ -114,37 +114,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
- /* const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      // Clean up existing state
-      cleanupAuthState();
-      
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-        console.error("Error during global sign out:", err);
-      }
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return false;
-      }
-
-      toast.success("Successfully signed in!");
-      return true;
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred during login");
-      return false;
-    }
-  };*/
   const login = async (email: string, password: string): Promise<boolean> => {
   try {
     cleanupAuthState();
@@ -165,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    // ✅ Check if email is verified
+    //  Check if email is verified
     if (!data.session?.user.email_confirmed_at) {
       toast.error("Please verify your email before logging in.");
       await supabase.auth.signOut();
@@ -182,47 +151,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 };
 
 
+  
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
+  try {
+    cleanupAuthState();
+
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-        console.error("Error during global sign out:", err);
-      }
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name
-          }
-        }
-      });
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      console.error("Error during global sign out:", err);
+    }
 
-      if (error) {
-        toast.error(error.message);
-        return false;
-      }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name
+        },
+        emailRedirectTo: 'https://yourdomain.com/login'
 
-      if (data.session) {
-        toast.success("Successfully signed up and logged in!");
-        return true;
-      } else {
-        toast.info("Sign-up successful! Please check your email for verification instructions.");
-        return true;
+ 
       }
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("An error occurred during registration");
+    });
+
+    if (error) {
+      toast.error(error.message);
       return false;
     }
-  };
+
+    // ✅ Don't auto-login if email not verified
+    if (!data.session) {
+      toast.success("Verification email sent! Please check your inbox.");
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Registration error:", error);
+    toast.error("An error occurred during registration");
+    return false;
+  }
+};
+
 
   const logout = async (): Promise<void> => {
     try {
