@@ -6,7 +6,7 @@ interface UsePaginationProps {
   increment?: number;
 }
 
-export function usePagination({ initialLimit = 20, increment = 20 }: UsePaginationProps = {}) {
+export function usePagination({ initialLimit = 30, increment = 35 }: UsePaginationProps = {}) {
   const [limit, setLimit] = useState(initialLimit);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
