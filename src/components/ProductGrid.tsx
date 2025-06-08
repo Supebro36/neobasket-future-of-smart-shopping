@@ -1,13 +1,17 @@
 
 import ProductCard from "./ProductCard";
 import { Product } from "../types";
+import { Button } from "@/components/ui/button";
 
 interface ProductGridProps {
   products: Product[];
   title?: string;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
-export default function ProductGrid({ products, title }: ProductGridProps) {
+export default function ProductGrid({ products, title, hasMore, isLoadingMore, onLoadMore }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
@@ -25,6 +29,19 @@ export default function ProductGrid({ products, title }: ProductGridProps) {
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      
+      {hasMore && (
+        <div className="flex justify-center mt-8">
+          <Button 
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            variant="outline"
+            size="lg"
+          >
+            {isLoadingMore ? "Loading..." : "Show More Products"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

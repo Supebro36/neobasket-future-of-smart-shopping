@@ -1,16 +1,18 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductGrid from "../components/ProductGrid";
 import { useProducts } from "../hooks/useDatabase";
+import { usePagination } from "../hooks/usePagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { convertDatabaseProductToProduct, Product } from "../types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const { limit, isLoadingMore, loadMore, reset } = usePagination({ initialLimit: 20, increment: 20 });
   
-  // Use the database hook to fetch all products or by category with higher limit
-  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, 100);
+  // Use the database hook to fetch all products or by category with pagination
+  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, limit);
   
   console.log('ProductsPage - selectedCategory:', selectedCategory);
   console.log('ProductsPage - dbProducts:', dbProducts);
@@ -25,6 +27,11 @@ export default function ProductsPage() {
   
   console.log('ProductsPage - converted products:', products);
   
+  // Reset pagination when category changes
+  useEffect(() => {
+    reset();
+  }, [selectedCategory, reset]);
+  
   const categories = [
     { value: "all", label: "All Categories" },
     { value: "electronics", label: "Electronics" },
@@ -34,6 +41,9 @@ export default function ProductsPage() {
     { value: "beauty", label: "Beauty" },
     { value: "books", label: "Books" }
   ];
+  
+  // Check if there might be more products to load
+  const hasMore = products.length === limit && products.length >= 20;
   
   if (error) {
     console.error('ProductsPage error:', error);
@@ -77,7 +87,7 @@ export default function ProductsPage() {
         </div>
       </div>
       
-      {isLoading ? (
+      {isLoading && products.length === 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {[...Array(12)].map((_, i) => (
             <div key={i} className="border rounded-lg overflow-hidden">
@@ -91,7 +101,12 @@ export default function ProductsPage() {
           ))}
         </div>
       ) : (
-        <ProductGrid products={products} />
+        <ProductGrid 
+          products={products} 
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
+        />
       )}
     </div>
   );

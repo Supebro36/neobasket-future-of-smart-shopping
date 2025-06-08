@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export class ProductService {
-  static async getProducts(category?: string, limit = 100) {
+  static async getProducts(category?: string, limit = 20) {
     console.log('ProductService.getProducts called with:', { category, limit });
     
     let query = supabase

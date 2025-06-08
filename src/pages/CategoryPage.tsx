@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductGrid from "../components/ProductGrid";
 import { useProducts } from "../hooks/useDatabase";
+import { usePagination } from "../hooks/usePagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { convertDatabaseProductToProduct, Product } from "../types";
 
 export default function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const { limit, isLoadingMore, loadMore, reset } = usePagination({ initialLimit: 20, increment: 20 });
   
-  // Use the database hook to fetch products by category with higher limit
-  const { data: dbProducts = [], isLoading, error } = useProducts(categoryId, 100);
+  // Use the database hook to fetch products by category with pagination
+  const { data: dbProducts = [], isLoading, error } = useProducts(categoryId, limit);
   
   console.log('CategoryPage - categoryId:', categoryId);
   console.log('CategoryPage - dbProducts:', dbProducts);
@@ -25,6 +27,11 @@ export default function CategoryPage() {
   
   console.log('CategoryPage - converted products:', products);
 
+  // Reset pagination when category changes
+  useEffect(() => {
+    reset();
+  }, [categoryId, reset]);
+
   // Format category name for display
   const formatCategoryName = (category: string) => {
     return category
@@ -34,6 +41,9 @@ export default function CategoryPage() {
   };
 
   const categoryName = categoryId ? formatCategoryName(categoryId) : "";
+  
+  // Check if there might be more products to load
+  const hasMore = products.length === limit && products.length >= 20;
   
   if (error) {
     console.error('CategoryPage error:', error);
@@ -60,7 +70,7 @@ export default function CategoryPage() {
         </p>
       </div>
       
-      {isLoading ? (
+      {isLoading && products.length === 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="border rounded-lg overflow-hidden">
@@ -74,7 +84,12 @@ export default function CategoryPage() {
           ))}
         </div>
       ) : (
-        <ProductGrid products={products} />
+        <ProductGrid 
+          products={products} 
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
+        />
       )}
     </div>
   );
