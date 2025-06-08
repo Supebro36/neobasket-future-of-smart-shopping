@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+ /* const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Clean up existing state
       cleanupAuthState();
@@ -144,7 +144,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error("An error occurred during login");
       return false;
     }
-  };
+  };*/
+  const login = async (email: string, password: string): Promise<boolean> => {
+  try {
+    cleanupAuthState();
+
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      console.error("Error during global sign out:", err);
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
+
+    // ✅ Check if email is verified
+    if (!data.session?.user.email_confirmed_at) {
+      toast.error("Please verify your email before logging in.");
+      await supabase.auth.signOut();
+      return false;
+    }
+
+    toast.success("Successfully signed in!");
+    return true;
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error("An error occurred during login");
+    return false;
+  }
+};
+
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
     try {
