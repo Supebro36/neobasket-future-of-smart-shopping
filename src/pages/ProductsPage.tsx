@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
-  // Use the database hook to fetch all products or by category
-  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, 50);
+  // Use the database hook to fetch all products or by category with higher limit
+  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, 100);
   
   console.log('ProductsPage - selectedCategory:', selectedCategory);
   console.log('ProductsPage - dbProducts:', dbProducts);

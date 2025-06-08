@@ -9,8 +9,8 @@ import { convertDatabaseProductToProduct, Product } from "../types";
 export default function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   
-  // Use the database hook to fetch products by category
-  const { data: dbProducts = [], isLoading, error } = useProducts(categoryId);
+  // Use the database hook to fetch products by category with higher limit
+  const { data: dbProducts = [], isLoading, error } = useProducts(categoryId, 100);
   
   console.log('CategoryPage - categoryId:', categoryId);
   console.log('CategoryPage - dbProducts:', dbProducts);

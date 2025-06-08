@@ -15,7 +15,7 @@ export function useCurrentUser() {
   });
 }
 
-export function useProducts(category?: string, limit = 20) {
+export function useProducts(category?: string, limit = 100) {
   return useQuery({
     queryKey: ['products', category, limit],
     queryFn: () => DatabaseService.getProducts(category, limit),

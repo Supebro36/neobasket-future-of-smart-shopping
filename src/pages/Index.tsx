@@ -13,8 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Index() {
   const { toggleChatWindow } = useAIAssistant();
   
-  // Fetch all products from database
-  const { data: dbProducts = [], isLoading, error } = useProducts(undefined, 50);
+  // Fetch all products from database with higher limit
+  const { data: dbProducts = [], isLoading, error } = useProducts(undefined, 100);
   
   // Convert database products to frontend Product type
   const allProducts: Product[] = dbProducts.map((dbProduct: any) => {
