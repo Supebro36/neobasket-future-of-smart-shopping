@@ -3,14 +3,30 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProductGrid from "../components/ProductGrid";
-import products, { getTopRatedProducts } from "../data/products";
+import { useProducts } from "../hooks/useDatabase";
+import { convertDatabaseProductToProduct, Product } from "../types";
 import { MessageSquare } from "lucide-react";
 import { useAIAssistant } from "../contexts/AIAssistantContext";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Index() {
-  const [featuredProducts, setFeaturedProducts] = useState(getTopRatedProducts(4));
   const { toggleChatWindow } = useAIAssistant();
+  
+  // Fetch all products from database
+  const { data: dbProducts = [], isLoading, error } = useProducts(undefined, 50);
+  
+  // Convert database products to frontend Product type
+  const allProducts: Product[] = dbProducts.map((dbProduct: any) => {
+    return convertDatabaseProductToProduct(dbProduct);
+  });
+  
+  // Get featured products (first 8 products)
+  const featuredProducts = allProducts.slice(0, 8);
+
+  console.log('Index - dbProducts:', dbProducts);
+  console.log('Index - converted products:', allProducts);
+  console.log('Index - featured products:', featuredProducts);
 
   // Categories for the featured categories section
   const categories = [
@@ -60,6 +76,10 @@ export default function Index() {
       buttonLink: "/category/clothing"
     }
   ];
+
+  if (error) {
+    console.error('Index page error:', error);
+  }
 
   return (
     <div>
@@ -148,7 +168,60 @@ export default function Index() {
               <Button variant="outline">View All</Button>
             </Link>
           </div>
-          <ProductGrid products={featuredProducts} />
+          
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="border rounded-lg overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                  <div className="p-4">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-6 w-1/2 mb-2" />
+                    <Skeleton className="h-4 w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Error loading products. Please try again later.</p>
+            </div>
+          ) : (
+            <ProductGrid products={featuredProducts} />
+          )}
+        </div>
+      </section>
+
+      {/* All Products Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="neo-container">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold">All Products</h2>
+            <p className="text-gray-600">
+              {isLoading ? "Loading..." : `${allProducts.length} products available`}
+            </p>
+          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="border rounded-lg overflow-hidden bg-white">
+                  <Skeleton className="h-48 w-full" />
+                  <div className="p-4">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-6 w-1/2 mb-2" />
+                    <Skeleton className="h-4 w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Error loading products. Please try again later.</p>
+            </div>
+          ) : (
+            <ProductGrid products={allProducts} />
+          )}
         </div>
       </section>
       

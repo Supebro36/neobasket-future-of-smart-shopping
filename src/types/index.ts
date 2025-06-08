@@ -1,5 +1,4 @@
 
-
 import { DatabaseProduct, DatabaseSeller } from './database';
 
 export interface Product {
@@ -53,7 +52,7 @@ export interface AIChatMessage {
 }
 
 // Helper functions to convert between database and frontend types
-export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { sellers?: DatabaseSeller }): Product {
+export function convertDatabaseProductToProduct(dbProduct: any): Product {
   console.log('Converting database product:', dbProduct);
   
   if (!dbProduct) {
@@ -67,13 +66,13 @@ export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { s
     price: dbProduct.price,
     description: dbProduct.description || '',
     category: dbProduct.category as Category,
-    image: dbProduct.image_url || '/placeholder.svg', // Fixed: using correct field name from database
+    image: dbProduct.image_url || '/placeholder.svg',
     rating: 4.5, // Default rating - you can calculate this from reviews later
     reviews: 0, // Default reviews count
     inStock: dbProduct.stock_quantity > 0,
     tags: [dbProduct.category], // Default tags
     seller: {
-      id: dbProduct.sellers?.seller_id || '',
+      id: dbProduct.sellers?.seller_id || dbProduct.seller_id || '',
       name: dbProduct.sellers?.business_name || dbProduct.sellers?.name || 'Unknown Seller',
       rating: 4.5, // Default seller rating
       verified: dbProduct.sellers?.verification_status === 'Verified'
@@ -86,4 +85,3 @@ export function convertDatabaseProductToProduct(dbProduct: DatabaseProduct & { s
 
 // Re-export database types for convenience
 export * from './database';
-
