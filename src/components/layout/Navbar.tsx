@@ -18,11 +18,13 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    console.log('Navbar logout clicked');
     await logout();
   };
 
   const handleRegularSearch = () => {
     if (searchQuery.trim().length >= 2) {
+      console.log('Navbar search:', searchQuery.trim());
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
       setShowSearch(false);

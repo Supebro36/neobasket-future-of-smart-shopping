@@ -1,36 +1,57 @@
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductGrid from "../components/ProductGrid";
-import { useProducts } from "../hooks/useDatabase";
+import { useProducts, useSearchProducts } from "../hooks/useDatabase";
 import { usePagination } from "../hooks/usePagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { convertDatabaseProductToProduct, Product } from "../types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function ProductsPage() {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { limit, isLoadingMore, loadMore, reset } = usePagination({ initialLimit: 20, increment: 20 });
   
-  // Use the database hook to fetch all products or by category with pagination
-  const { data: dbProducts = [], isLoading, error } = useProducts(selectedCategory === "all" ? undefined : selectedCategory, limit);
+  // Use search hook when there's a search query, otherwise use regular products hook
+  const { data: searchResults = [], isLoading: isSearchLoading, error: searchError } = useSearchProducts(
+    searchQuery, 
+    selectedCategory === "all" ? undefined : selectedCategory
+  );
   
+  const { data: dbProducts = [], isLoading: isProductsLoading, error: productsError } = useProducts(
+    selectedCategory === "all" ? undefined : selectedCategory, 
+    limit
+  );
+  
+  // Determine which data to use
+  const isSearchMode = searchQuery.length >= 2;
+  const isLoading = isSearchMode ? isSearchLoading : isProductsLoading;
+  const error = isSearchMode ? searchError : productsError;
+  const rawProducts = isSearchMode ? searchResults : dbProducts;
+  
+  console.log('ProductsPage - searchQuery:', searchQuery);
+  console.log('ProductsPage - isSearchMode:', isSearchMode);
+  console.log('ProductsPage - rawProducts:', rawProducts);
   console.log('ProductsPage - selectedCategory:', selectedCategory);
-  console.log('ProductsPage - dbProducts:', dbProducts);
   console.log('ProductsPage - isLoading:', isLoading);
   console.log('ProductsPage - error:', error);
   
   // Convert database products to frontend Product type
-  const products: Product[] = dbProducts.map((dbProduct: any) => {
+  const products: Product[] = rawProducts.map((dbProduct: any) => {
     console.log('Converting product in ProductsPage:', dbProduct);
     return convertDatabaseProductToProduct(dbProduct);
   });
   
   console.log('ProductsPage - converted products:', products);
   
-  // Reset pagination when category changes
+  // Reset pagination when category or search changes
   useEffect(() => {
-    reset();
-  }, [selectedCategory, reset]);
+    if (!isSearchMode) {
+      reset();
+    }
+  }, [selectedCategory, searchQuery, reset, isSearchMode]);
   
   const categories = [
     { value: "all", label: "All Categories" },
@@ -42,8 +63,8 @@ export default function ProductsPage() {
     { value: "books", label: "Books" }
   ];
   
-  // Check if there might be more products to load
-  const hasMore = products.length === limit && products.length >= 20;
+  // Check if there might be more products to load (only for non-search mode)
+  const hasMore = !isSearchMode && products.length === limit && products.length >= 20;
   
   if (error) {
     console.error('ProductsPage error:', error);
@@ -62,7 +83,9 @@ export default function ProductsPage() {
     <div className="neo-container py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">All Products</h1>
+          <h1 className="text-3xl font-bold">
+            {isSearchMode ? `Search Results for "${searchQuery}"` : "All Products"}
+          </h1>
           <p className="text-gray-600 mt-2">
             {isLoading 
               ? "Loading products..." 
