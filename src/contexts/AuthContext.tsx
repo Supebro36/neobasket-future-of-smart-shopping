@@ -169,8 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           name: name
         },
-        emailRedirectTo: 'https://yourdomain.com/login'
-
+        emailRedirectTo: 'https://neobasket.vercel.app/login'
  
       }
     });
