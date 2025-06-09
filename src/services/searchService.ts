@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export class SearchService {
@@ -48,7 +47,7 @@ export class SearchService {
       console.log('SearchService raw data:', data);
 
       // Sort results by relevance on the client side for better ranking
-      const sortedResults = this.rankSearchResults(data || [], normalizedQuery);
+      const sortedResults = SearchService.rankSearchResults(data || [], normalizedQuery);
       
       console.log('SearchService sorted results:', sortedResults);
       return sortedResults;
