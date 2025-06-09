@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Pages
 import Layout from "./components/layout/Layout";
@@ -25,7 +26,6 @@ import AboutUsPage from "./pages/AboutUsPage";
 import BecomeSellerPage from "./pages/BecomeSellerPage";
 import CareersPage from "./pages/CareersPage";
 import ContactUsPage from "./pages/ContactUsPage";
-import { AuthProvider } from "./contexts/AuthContext";
 
 const App = () => {
   // Move QueryClient initialization inside component
@@ -40,8 +40,8 @@ const App = () => {
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                <Routes>
-                  <Route path="/" element={<Layout />}>
+                <Layout>
+                  <Routes>
                     <Route index element={<Index />} />
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/sellers" element={<SellersPage />} />
@@ -58,8 +58,8 @@ const App = () => {
                     <Route path="/careers" element={<CareersPage />} />
                     <Route path="/contact-us" element={<ContactUsPage />} />
                     <Route path="*" element={<NotFound />} />
-                  </Route>
-                </Routes>
+                  </Routes>
+                </Layout>
               </TooltipProvider>
             </AIAssistantProvider>
           </CartProvider>

@@ -1,18 +1,22 @@
 
-import { Outlet } from "react-router-dom";
+import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AIAssistantChat from "../AIAssistantChat";
 import { useAIAssistant } from "../../contexts/AIAssistantContext";
 
-export default function Layout() {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
   const { isOpen } = useAIAssistant();
   
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        <Outlet />
+        {children}
       </main>
       <Footer />
       {isOpen && <AIAssistantChat />}
