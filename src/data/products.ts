@@ -90,6 +90,45 @@ const randomRating = (): number => {
   return parseFloat((Math.random() * 1.5 + 3.5).toFixed(1));
 };
 
+// Function to generate random stock quantity
+const randomStockQuantity = (): number => {
+  return Math.floor(Math.random() * 100) + 1;
+};
+
+// Function to generate random specifications
+const generateSpecifications = (category: string): any => {
+  const baseSpecs = {
+    weight: `${Math.floor(Math.random() * 500) + 100}g`,
+    dimensions: `${Math.floor(Math.random() * 20) + 10}x${Math.floor(Math.random() * 15) + 8}x${Math.floor(Math.random() * 10) + 2}cm`,
+    warranty: `${Math.floor(Math.random() * 3) + 1} year(s)`
+  };
+
+  switch (category) {
+    case 'electronics':
+      return {
+        ...baseSpecs,
+        batteryLife: `${Math.floor(Math.random() * 20) + 5} hours`,
+        connectivity: ['Bluetooth', 'WiFi', 'USB'][Math.floor(Math.random() * 3)],
+        powerSource: 'Battery/AC Adapter'
+      };
+    case 'clothing':
+      return {
+        ...baseSpecs,
+        material: ['Cotton', 'Polyester', 'Silk', 'Wool'][Math.floor(Math.random() * 4)],
+        careInstructions: 'Machine wash cold',
+        sizes: ['XS', 'S', 'M', 'L', 'XL']
+      };
+    case 'home-decor':
+      return {
+        ...baseSpecs,
+        material: ['Wood', 'Metal', 'Ceramic', 'Glass'][Math.floor(Math.random() * 4)],
+        style: ['Modern', 'Traditional', 'Rustic', 'Contemporary'][Math.floor(Math.random() * 4)]
+      };
+    default:
+      return baseSpecs;
+  }
+};
+
 // Generate electronics products
 const generateElectronicsProducts = (): Product[] => {
   const electronicsProducts: Product[] = [];
@@ -177,6 +216,7 @@ const generateElectronicsProducts = (): Product[] => {
     const modelNumber = Math.floor(Math.random() * 1000) + 1000;
     const basePrice = randomPrice(49.99, 999.99);
     const discountPrice = randomDiscountPrice(basePrice);
+    const stockQty = randomStockQuantity();
     
     electronicsProducts.push({
       id: `electronics${i + 1}`,
@@ -188,9 +228,13 @@ const generateElectronicsProducts = (): Product[] => {
       image: `https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
       rating: randomRating(),
       reviews: randomReviews(),
-      inStock: Math.random() > 0.1, // 90% chance to be in stock
+      inStock: stockQty > 0,
+      stockQuantity: stockQty,
       tags: electronicsTags[tagIndex],
-      seller: sellers[sellerIndex]
+      seller: sellers[sellerIndex],
+      specifications: generateSpecifications('electronics'),
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -284,6 +328,7 @@ const generateClothingProducts = (): Product[] => {
     const style = String.fromCharCode(65 + (i % 26)) + "-" + (Math.floor(Math.random() * 900) + 100);
     const basePrice = randomPrice(19.99, 299.99);
     const discountPrice = randomDiscountPrice(basePrice);
+    const stockQty = randomStockQuantity();
     
     clothingProducts.push({
       id: `clothing${i + 1}`,
@@ -295,9 +340,13 @@ const generateClothingProducts = (): Product[] => {
       image: `https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
       rating: randomRating(),
       reviews: randomReviews(),
-      inStock: Math.random() > 0.1, // 90% chance to be in stock
+      inStock: stockQty > 0,
+      stockQuantity: stockQty,
       tags: clothingTags[tagIndex],
-      seller: sellers[sellerIndex]
+      seller: sellers[sellerIndex],
+      specifications: generateSpecifications('clothing'),
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -391,6 +440,7 @@ const generateHomeDecorProducts = (): Product[] => {
     const collection = ["Elegance", "Modern", "Rustic", "Minimalist", "Bohemian", "Classic"][i % 6];
     const basePrice = randomPrice(19.99, 399.99);
     const discountPrice = randomDiscountPrice(basePrice);
+    const stockQty = randomStockQuantity();
     
     homeDecorProducts.push({
       id: `homedecor${i + 1}`,
@@ -402,9 +452,13 @@ const generateHomeDecorProducts = (): Product[] => {
       image: `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
       rating: randomRating(),
       reviews: randomReviews(),
-      inStock: Math.random() > 0.1, // 90% chance to be in stock
+      inStock: stockQty > 0,
+      stockQuantity: stockQty,
       tags: homeDecorTags[tagIndex],
-      seller: sellers[sellerIndex]
+      seller: sellers[sellerIndex],
+      specifications: generateSpecifications('home-decor'),
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -498,6 +552,7 @@ const generateAccessoriesProducts = (): Product[] => {
     const material = ["Leather", "Metal", "Cotton", "Silk", "Nylon", "Canvas"][i % 6];
     const basePrice = randomPrice(9.99, 199.99);
     const discountPrice = randomDiscountPrice(basePrice);
+    const stockQty = randomStockQuantity();
     
     accessoriesProducts.push({
       id: `accessories${i + 1}`,
@@ -509,9 +564,13 @@ const generateAccessoriesProducts = (): Product[] => {
       image: `https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
       rating: randomRating(),
       reviews: randomReviews(),
-      inStock: Math.random() > 0.1, // 90% chance to be in stock
+      inStock: stockQty > 0,
+      stockQuantity: stockQty,
       tags: accessoriesTags[tagIndex],
-      seller: sellers[sellerIndex]
+      seller: sellers[sellerIndex],
+      specifications: generateSpecifications('accessories'),
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -672,6 +731,7 @@ const generateCarBikeAccessoriesProducts = (): Product[] => {
     const model = `${String.fromCharCode(65 + (i % 26))}${Math.floor(Math.random() * 900) + 100}`;
     const basePrice = randomPrice(15.99, 299.99);
     const discountPrice = randomDiscountPrice(basePrice);
+    const stockQty = randomStockQuantity();
     
     carBikeProducts.push({
       id: `carbike${i + 1}`,
@@ -683,9 +743,13 @@ const generateCarBikeAccessoriesProducts = (): Product[] => {
       image: `https://images.unsplash.com/photo-1487887235947-a955ef187fcc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
       rating: randomRating(),
       reviews: randomReviews(),
-      inStock: Math.random() > 0.1, // 90% chance to be in stock
+      inStock: stockQty > 0,
+      stockQuantity: stockQty,
       tags: carBikeTags[tagIndex],
-      seller: sellers[sellerIndex]
+      seller: sellers[sellerIndex],
+      specifications: generateSpecifications('accessories'),
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -704,7 +768,7 @@ const products: Product[] = [
   ...clothingProducts,
   ...homeDecorProducts,
   ...accessoriesProducts,
-  ...carBikeAccessoriesProducts // Added after normal accessories
+  ...carBikeAccessoriesProducts
 ];
 
 export default products;
@@ -729,18 +793,14 @@ export const getTopRatedProducts = (limit = 4): Product[] => {
     .slice(0, limit);
 };
 
-// Additional utility functions for filtering and searching products
-
 export const getDiscountedProducts = (limit = 8): Product[] => {
   return products
     .filter(p => p.discountPrice !== undefined)
-    .sort(() => Math.random() - 0.5) // Shuffle for variety
+    .sort(() => Math.random() - 0.5)
     .slice(0, limit);
 };
 
 export const getNewArrivals = (limit = 8): Product[] => {
-  // In a real app, this would be based on creation date
-  // Here we'll just return random products to simulate new arrivals
   return [...products]
     .sort(() => Math.random() - 0.5)
     .slice(0, limit);
@@ -763,22 +823,14 @@ export const filterProducts = (
   tags?: string[]
 ): Product[] => {
   return products.filter(product => {
-    // Filter by category
-    if (category && product.category !== category) return false;
-    
-    // Filter by price range
     const price = product.discountPrice || product.price;
+    if (category && product.category !== category) return false;
     if (minPrice !== undefined && price < minPrice) return false;
     if (maxPrice !== undefined && price > maxPrice) return false;
-    
-    // Filter by rating
     if (minRating !== undefined && product.rating < minRating) return false;
-    
-    // Filter by tags
     if (tags && tags.length > 0) {
       if (!tags.some(tag => product.tags.includes(tag))) return false;
     }
-    
     return true;
   });
 };
