@@ -28,12 +28,8 @@ export class SearchService {
       query = query.eq('category', category);
     }
 
-    // Enhanced search across multiple fields with better relevance
-    query = query.or(`
-      name.ilike.%${normalizedQuery}%,
-      description.ilike.%${normalizedQuery}%,
-      category.ilike.%${normalizedQuery}%
-    `);
+    // Enhanced search across multiple fields with proper single-line formatting
+    query = query.or(`name.ilike.%${normalizedQuery}%,description.ilike.%${normalizedQuery}%,category.ilike.%${normalizedQuery}%`);
 
     // Order by relevance and price
     query = query.order('price', { ascending: true });
@@ -99,10 +95,7 @@ export class SearchService {
       .from('products')
       .select('name, category')
       .eq('is_active', true)
-      .or(`
-        name.ilike.%${normalizedQuery}%,
-        category.ilike.%${normalizedQuery}%
-      `)
+      .or(`name.ilike.%${normalizedQuery}%,category.ilike.%${normalizedQuery}%`)
       .limit(10);
 
     if (error) {
