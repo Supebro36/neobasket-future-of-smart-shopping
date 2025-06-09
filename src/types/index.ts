@@ -1,3 +1,4 @@
+
 import { DatabaseProduct, DatabaseSeller } from './database';
 
 export interface Product {
@@ -68,9 +69,9 @@ export function convertDatabaseProductToProduct(dbProduct: any): Product {
     discountPrice: dbProduct.discount_price ? parseFloat(dbProduct.discount_price) : undefined,
     image: dbProduct.image_url && dbProduct.image_url !== 'Null' ? dbProduct.image_url : '/placeholder.svg',
     description: dbProduct.description || '',
-    category: dbProduct.category || 'uncategorized',
-    rating: dbProduct.rating || 4.5, // Default rating
-    reviews: dbProduct.review_count || Math.floor(Math.random() * 100) + 10, // Default review count
+    category: (dbProduct.category || 'electronics') as Category,
+    rating: dbProduct.rating || 4.5,
+    reviews: dbProduct.review_count || Math.floor(Math.random() * 100) + 10,
     inStock: (dbProduct.stock_quantity || 0) > 0,
     stockQuantity: dbProduct.stock_quantity || 0,
     seller: {
@@ -80,7 +81,7 @@ export function convertDatabaseProductToProduct(dbProduct: any): Product {
       rating: seller.rating || 4.5
     },
     specifications: dbProduct.specifications || {},
-    tags: dbProduct.tags || [],
+    tags: Array.isArray(dbProduct.tags) ? dbProduct.tags : [],
     createdAt: dbProduct.created_at || new Date().toISOString(),
     updatedAt: dbProduct.updated_at || new Date().toISOString()
   };
