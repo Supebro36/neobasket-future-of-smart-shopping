@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SearchService } from "@/services";
@@ -19,7 +19,7 @@ import {
   CommandList
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Search, AlertCircle } from "lucide-react";
+import { Search, AlertCircle, Star } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SmartSearch() {
@@ -31,8 +31,24 @@ export default function SmartSearch() {
   const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['smartSearch', query],
     queryFn: () => SearchService.searchProducts(query),
-    enabled: query.length >= 2, // Only search when query has at least 2 characters
-    staleTime: 30000, // Cache results for 30 seconds
+    enabled: query.length >= 2,
+    staleTime: 30000,
+  });
+
+  // Get search suggestions for auto-complete
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ['searchSuggestions', query],
+    queryFn: () => SearchService.getSearchSuggestions(query),
+    enabled: query.length >= 1 && query.length < 3,
+    staleTime: 60000,
+  });
+
+  // Get popular search terms when dialog opens
+  const { data: popularTerms = [] } = useQuery({
+    queryKey: ['popularSearchTerms'],
+    queryFn: SearchService.getPopularSearchTerms,
+    enabled: open && query.length === 0,
+    staleTime: 300000, // 5 minutes
   });
   
   const handleProductSelect = (productId: string) => {
@@ -40,13 +56,20 @@ export default function SmartSearch() {
     setOpen(false);
     setQuery("");
   };
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setQuery(suggestion);
+  };
   
   const handleSearch = () => {
     if (query.length < 2) {
       toast.info("Please enter at least 2 characters to search");
       return;
     }
-    // The search will be triggered automatically by React Query
+    // Navigate to products page with search query
+    navigate(`/products?search=${encodeURIComponent(query)}`);
+    setOpen(false);
+    setQuery("");
   };
   
   return (
@@ -106,9 +129,42 @@ export default function SmartSearch() {
                     </Button>
                   </div>
                 )}
+
+                {/* Show search suggestions when typing */}
+                {query.length >= 1 && query.length < 3 && suggestions.length > 0 && (
+                  <CommandGroup heading="Search Suggestions">
+                    {suggestions.map((suggestion, index) => (
+                      <CommandItem 
+                        key={index}
+                        onSelect={() => handleSuggestionSelect(suggestion)}
+                        className="flex items-center gap-2 py-2 cursor-pointer"
+                      >
+                        <Search size={16} className="text-gray-400" />
+                        <span>{suggestion}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
+
+                {/* Show popular terms when no query */}
+                {query.length === 0 && popularTerms.length > 0 && (
+                  <CommandGroup heading="Popular Searches">
+                    {popularTerms.slice(0, 8).map((term, index) => (
+                      <CommandItem 
+                        key={index}
+                        onSelect={() => handleSuggestionSelect(term)}
+                        className="flex items-center gap-2 py-2 cursor-pointer"
+                      >
+                        <Star size={16} className="text-neo-purple" />
+                        <span className="capitalize">{term}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
                 
+                {/* Show search results */}
                 {searchResults.length > 0 && (
-                  <CommandGroup>
+                  <CommandGroup heading="Products">
                     {searchResults.map((product) => (
                       <CommandItem 
                         key={product.product_id}
@@ -124,8 +180,8 @@ export default function SmartSearch() {
                           }}
                         />
                         <div className="flex-1">
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-medium text-sm">{product.name}</p>
+                          <p className="text-sm text-green-600">
                             ${product.price}
                           </p>
                           <p className="text-xs text-gray-400 capitalize">{product.category}</p>
@@ -136,10 +192,15 @@ export default function SmartSearch() {
                 )}
                 
                 {query.length >= 2 && searchResults.length === 0 && !isLoading && !error && (
-                  <CommandEmpty>No products found matching your search.</CommandEmpty>
+                  <CommandEmpty>
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500 mb-2">No products found matching "{query}"</p>
+                      <p className="text-xs text-gray-400">Try different keywords or browse our categories</p>
+                    </div>
+                  </CommandEmpty>
                 )}
                 
-                {query.length < 2 && (
+                {query.length < 2 && suggestions.length === 0 && popularTerms.length === 0 && (
                   <div className="py-6 text-center text-sm text-gray-500">
                     Enter at least 2 characters to start searching
                   </div>

@@ -14,10 +14,25 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const { toggleChatWindow } = useAIAssistant();
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleRegularSearch = () => {
+    if (searchQuery.trim().length >= 2) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setShowSearch(false);
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleRegularSearch();
+    }
   };
 
   return (
@@ -56,11 +71,12 @@ export default function Navbar() {
 
             {/* AI Assistant */}
             <button 
-              className="text-gray-600 hover:text-neo-purple"
+              className="text-gray-600 hover:text-neo-purple relative"
               onClick={toggleChatWindow}
-              aria-label="AI Assistant"
+              aria-label="AI Shopping Assistant"
             >
               <MessageSquare size={20} />
+              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-3 w-3"></span>
             </button>
 
             {/* Shopping cart */}
@@ -121,11 +137,19 @@ export default function Navbar() {
           <div className="pb-3 pt-1 animate-fade-in">
             <div className="flex gap-2">
               <Input 
-                placeholder="Search products..." 
+                placeholder="Search products in our database..." 
                 className="input-field"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearchKeyPress}
                 autoFocus
               />
-              <Button variant="default" className="bg-neo-purple hover:bg-neo-purple/90">
+              <Button 
+                variant="default" 
+                className="bg-neo-purple hover:bg-neo-purple/90"
+                onClick={handleRegularSearch}
+                disabled={searchQuery.trim().length < 2}
+              >
                 Search
               </Button>
             </div>
