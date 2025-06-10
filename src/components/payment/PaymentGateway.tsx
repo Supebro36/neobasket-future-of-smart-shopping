@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -32,23 +31,30 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
   });
   const { subtotal, createOrder, isCreatingOrder } = useCart();
 
-  const paymentMethods = [
+  const paymentMethods = useMemo(() => [
     { id: "upi", name: "UPI", icon: Smartphone, description: "Pay using UPI apps like GPay, PhonePe, Paytm" },
     { id: "card", name: "Credit/Debit Card", icon: CreditCard, description: "Visa, Mastercard, Rupay" },
     { id: "wallet", name: "Digital Wallet", icon: Wallet, description: "Paytm, PhonePe, Amazon Pay" },
     { id: "netbanking", name: "Net Banking", icon: DollarSign, description: "All major banks supported" },
     { id: "cod", name: "Cash on Delivery", icon: Truck, description: "Pay when you receive your order" }
-  ];
+  ], []);
 
-  const handlePayment = async () => {
+  const handlePayment = useCallback(async () => {
     console.log("Processing payment with method:", paymentMethod);
     console.log("Shipping address:", shippingAddress);
     
+    // Validate required fields
+    if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+      toast.error("Please fill in all shipping address fields");
+      return;
+    }
+
     try {
-      // Create order in database
+      // Create order in database with optimized call
       const success = await createOrder(paymentMethod, shippingAddress);
       
       if (success) {
+        toast.success("Payment processed successfully!");
         onPaymentSuccess();
         onClose();
       }
@@ -56,7 +62,12 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
       console.error("Payment processing failed:", error);
       toast.error("Payment failed. Please try again.");
     }
-  };
+  }, [paymentMethod, shippingAddress, createOrder, onPaymentSuccess, onClose]);
+
+  const getTotalAmount = useCallback(() => {
+    const codCharge = paymentMethod === "cod" ? 40 : 0;
+    return subtotal + codCharge;
+  }, [subtotal, paymentMethod]);
 
   const renderPaymentForm = () => {
     switch (paymentMethod) {
@@ -195,11 +206,6 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
     }
   };
 
-  const getTotalAmount = () => {
-    const codCharge = paymentMethod === "cod" ? 40 : 0;
-    return subtotal + codCharge;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -213,41 +219,45 @@ export default function PaymentGateway({ isOpen, onClose, onPaymentSuccess }: Pa
             <h3 className="font-medium mb-4">Shipping Address</h3>
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="street">Street Address</Label>
+                <Label htmlFor="street">Street Address *</Label>
                 <Input
                   id="street"
                   placeholder="Enter your street address"
                   value={shippingAddress.street}
                   onChange={(e) => setShippingAddress(prev => ({ ...prev, street: e.target.value }))}
+                  required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     placeholder="City"
                     value={shippingAddress.city}
                     onChange={(e) => setShippingAddress(prev => ({ ...prev, city: e.target.value }))}
+                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="state">State *</Label>
                   <Input
                     id="state"
                     placeholder="State"
                     value={shippingAddress.state}
                     onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
+                    required
                   />
                 </div>
               </div>
               <div>
-                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Label htmlFor="zipCode">ZIP Code *</Label>
                 <Input
                   id="zipCode"
                   placeholder="ZIP Code"
                   value={shippingAddress.zipCode}
                   onChange={(e) => setShippingAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                  required
                 />
               </div>
             </div>

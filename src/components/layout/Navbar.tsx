@@ -15,6 +15,7 @@ export default function Navbar() {
   const { toggleChatWindow } = useAIAssistant();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDropdownLocked, setIsDropdownLocked] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -35,6 +36,10 @@ export default function Navbar() {
     if (e.key === 'Enter') {
       handleRegularSearch();
     }
+  };
+
+  const handleUserDropdownDoubleClick = () => {
+    setIsDropdownLocked(!isDropdownLocked);
   };
 
   return (
@@ -93,12 +98,19 @@ export default function Navbar() {
 
             {/* User Account */}
             {isAuthenticated ? (
-              <div className="relative group">
-                <button className="flex items-center space-x-1 text-sm">
+              <div className={`relative ${isDropdownLocked ? 'dropdown-locked' : 'group'}`}>
+                <button 
+                  className="flex items-center space-x-1 text-sm"
+                  onDoubleClick={handleUserDropdownDoubleClick}
+                >
                   <User size={20} />
                   <span className="hidden md:block">{user?.name}</span>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 hidden group-hover:block">
+                <div className={`absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 ${
+                  isDropdownLocked 
+                    ? 'block' 
+                    : 'hidden group-hover:block'
+                }`}>
                   <div className="px-4 py-2 border-b">
                     <p className="text-sm font-medium">{user?.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
@@ -112,6 +124,11 @@ export default function Navbar() {
                     <LogOut size={16} className="mr-2" />
                     Logout
                   </button>
+                  {isDropdownLocked && (
+                    <div className="px-4 py-2 text-xs text-gray-500 border-t">
+                      Double-click user icon to close
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -158,6 +175,12 @@ export default function Navbar() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .dropdown-locked .absolute {
+          position: absolute !important;
+        }
+      `}</style>
     </div>
   );
 }
