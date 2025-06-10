@@ -25,10 +25,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        console.log('Auth state changed:', event, currentSession);
+        
+        if (!mounted) return;
+
         setSession(currentSession);
+        
         if (currentSession?.user) {
           const appUser: AppUser = {
             id: currentSession.user.id,
@@ -70,6 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
         setSession(initialSession);
         
         if (initialSession?.user) {
@@ -86,26 +96,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Error checking auth session:", error);
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const cleanupAuthState = () => {
+    console.log('Cleaning up auth state');
     // Remove standard auth tokens
     localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('neobasket-user');
+    
     // Remove all Supabase auth keys from localStorage
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
         localStorage.removeItem(key);
       }
     });
+    
     // Remove from sessionStorage if in use
     Object.keys(sessionStorage || {}).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
@@ -116,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
   try {
+    console.log('Starting login process for:', email);
     cleanupAuthState();
 
     try {
@@ -130,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) {
+      console.error('Login error:', error);
       toast.error(error.message);
       return false;
     }
@@ -141,6 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
+    console.log('Login successful for:', email);
     toast.success("Successfully signed in!");
     return true;
   } catch (error) {
@@ -150,10 +170,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 };
 
-
-  
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
   try {
+    console.log('Starting registration process for:', email);
     cleanupAuthState();
 
     try {
@@ -175,6 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) {
+      console.error('Registration error:', error);
       toast.error(error.message);
       return false;
     }
@@ -193,16 +213,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 };
 
-
   const logout = async (): Promise<void> => {
     try {
-      await supabase.auth.signOut();
+      console.log('Starting logout process');
+      
+      // First clear local state
+      setUser(null);
+      setSession(null);
+      
+      // Clean up auth state
       cleanupAuthState();
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      
+      if (error) {
+        console.error("Logout error:", error);
+        // Don't show error to user as cleanup was successful
+      }
+      
+      console.log('Logout completed successfully');
       toast.success("Successfully logged out");
+      
+      // Force navigation and page refresh for clean state
       navigate("/login");
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error("An error occurred during logout");
+      // Still try to clean up and redirect
+      cleanupAuthState();
+      setUser(null);
+      setSession(null);
+      toast.success("Logged out");
+      navigate("/login");
     }
   };
 

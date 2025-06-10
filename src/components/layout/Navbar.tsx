@@ -20,7 +20,11 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     console.log('Navbar logout clicked');
-    await logout();
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleRegularSearch = () => {
@@ -98,7 +102,7 @@ export default function Navbar() {
 
             {/* User Account */}
             {isAuthenticated ? (
-              <div className={`relative ${isDropdownLocked ? 'dropdown-locked' : 'group'}`}>
+              <div className={`relative ${isDropdownLocked ? 'block' : 'group'}`}>
                 <button 
                   className="flex items-center space-x-1 text-sm"
                   onDoubleClick={handleUserDropdownDoubleClick}
@@ -106,10 +110,10 @@ export default function Navbar() {
                   <User size={20} />
                   <span className="hidden md:block">{user?.name}</span>
                 </button>
-                <div className={`absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 ${
+                <div className={`absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 transition-all duration-200 ${
                   isDropdownLocked 
-                    ? 'block' 
-                    : 'hidden group-hover:block'
+                    ? 'opacity-100 visible transform translate-y-0' 
+                    : 'opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0'
                 }`}>
                   <div className="px-4 py-2 border-b">
                     <p className="text-sm font-medium">{user?.name}</p>

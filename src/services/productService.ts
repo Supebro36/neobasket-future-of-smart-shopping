@@ -33,8 +33,19 @@ export class ProductService {
       throw error;
     }
 
-    console.log('ProductService returning data:', data);
-    return data || [];
+    // Ensure we return valid data even if sellers is null
+    const processedData = (data || []).map(product => ({
+      ...product,
+      sellers: product.sellers || {
+        seller_id: product.seller_id,
+        name: 'Unknown Seller',
+        business_name: 'Unknown Business',
+        verification_status: 'Pending'
+      }
+    }));
+
+    console.log('ProductService returning processed data:', processedData);
+    return processedData;
   }
 
   static async getProductById(productId: string) {
@@ -67,6 +78,16 @@ export class ProductService {
       throw error;
     }
 
+    // Ensure seller data exists
+    if (data && !data.sellers) {
+      data.sellers = {
+        seller_id: data.seller_id,
+        name: 'Unknown Seller',
+        business_name: 'Unknown Business',
+        verification_status: 'Pending'
+      };
+    }
+
     return data;
   }
 
@@ -95,7 +116,18 @@ export class ProductService {
       throw error;
     }
 
-    return data || [];
+    // Process data to handle null sellers
+    const processedData = (data || []).map(product => ({
+      ...product,
+      sellers: product.sellers || {
+        seller_id: product.seller_id,
+        name: 'Unknown Seller',
+        business_name: 'Unknown Business',
+        verification_status: 'Pending'
+      }
+    }));
+
+    return processedData;
   }
 
   static async getAllCategories() {
