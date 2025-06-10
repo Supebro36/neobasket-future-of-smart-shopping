@@ -20,7 +20,7 @@ export function useProducts(category?: string, limit = 30) {
     queryKey: ['products', category, limit],
     queryFn: () => DatabaseService.getProducts(category, limit),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (replaces cacheTime)
   });
 }
 
@@ -38,7 +38,7 @@ export function useProductsByCategory(category: string, limit = 50) {
     queryFn: () => DatabaseService.getProducts(category, limit),
     enabled: !!category,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (replaces cacheTime)
   });
 }
 
@@ -52,7 +52,7 @@ export function useAllCategories() {
       return categories;
     },
     staleTime: 15 * 60 * 1000, // 15 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (replaces cacheTime)
   });
 }
 

@@ -131,7 +131,7 @@ export default function SmartSearch() {
                 )}
 
                 {/* Show search suggestions when typing */}
-                {query.length >= 1 && query.length < 3 && suggestions.length > 0 && (
+                {query.length >= 1 && query.length < 3 && Array.isArray(suggestions) && suggestions.length > 0 && (
                   <CommandGroup heading="Search Suggestions">
                     {suggestions.map((suggestion, index) => (
                       <CommandItem 
@@ -147,7 +147,7 @@ export default function SmartSearch() {
                 )}
 
                 {/* Show popular terms when no query */}
-                {query.length === 0 && popularTerms.length > 0 && (
+                {query.length === 0 && Array.isArray(popularTerms) && popularTerms.length > 0 && (
                   <CommandGroup heading="Popular Searches">
                     {popularTerms.slice(0, 8).map((term, index) => (
                       <CommandItem 
@@ -200,7 +200,7 @@ export default function SmartSearch() {
                   </CommandEmpty>
                 )}
                 
-                {query.length < 2 && suggestions.length === 0 && popularTerms.length === 0 && (
+                {query.length < 2 && (!Array.isArray(suggestions) || suggestions.length === 0) && (!Array.isArray(popularTerms) || popularTerms.length === 0) && (
                   <div className="py-6 text-center text-sm text-gray-500">
                     Enter at least 2 characters to start searching
                   </div>

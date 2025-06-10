@@ -48,6 +48,68 @@ export class SearchService {
     return data || [];
   }
 
+  static async getSearchSuggestions(query: string): Promise<string[]> {
+    if (!query || query.length < 1) {
+      return [];
+    }
+
+    try {
+      // Get product names and categories that match the query
+      const { data, error } = await supabase
+        .from('products')
+        .select('name, category')
+        .eq('is_active', true)
+        .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
+        .limit(5);
+
+      if (error) {
+        console.error('Error getting search suggestions:', error);
+        return [];
+      }
+
+      const suggestions: string[] = [];
+      data?.forEach(product => {
+        if (product.name.toLowerCase().includes(query.toLowerCase())) {
+          suggestions.push(product.name);
+        }
+        if (product.category.toLowerCase().includes(query.toLowerCase()) && 
+            !suggestions.includes(product.category)) {
+          suggestions.push(product.category);
+        }
+      });
+
+      return [...new Set(suggestions)].slice(0, 5);
+    } catch (error) {
+      console.error('Error in getSearchSuggestions:', error);
+      return [];
+    }
+  }
+
+  static async getPopularSearchTerms(): Promise<string[]> {
+    try {
+      // Get popular categories and product names
+      const { data, error } = await supabase
+        .from('products')
+        .select('category, name')
+        .eq('is_active', true)
+        .limit(50);
+
+      if (error) {
+        console.error('Error getting popular search terms:', error);
+        return [];
+      }
+
+      // Extract popular categories and some product names
+      const categories = [...new Set(data?.map(p => p.category) || [])];
+      const productNames = data?.slice(0, 10).map(p => p.name) || [];
+      
+      return [...categories, ...productNames].slice(0, 8);
+    } catch (error) {
+      console.error('Error in getPopularSearchTerms:', error);
+      return [];
+    }
+  }
+
   private static rankSearchResults(products: any[], searchQuery: string) {
     const query = searchQuery.toLowerCase();
     
