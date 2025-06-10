@@ -1,72 +1,72 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { AIAssistantProvider } from "./contexts/AIAssistantContext";
-import { AuthProvider } from "./contexts/AuthContext";
 
-// Pages
+// Import all pages
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
+import ProductsPage from "./pages/ProductsPage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
-import ProductsPage from "./pages/ProductsPage";
-import SellersPage from "./pages/SellersPage";
 import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
-import NotFound from "./pages/NotFound";
+import ProfilePage from "./pages/ProfilePage";
+import OrdersPage from "./pages/OrdersPage";
+import AboutUsPage from "./pages/AboutUsPage";
+import ContactUsPage from "./pages/ContactUsPage";
 import FAQPage from "./pages/FAQPage";
 import ShippingPage from "./pages/ShippingPage";
 import ReturnsPage from "./pages/ReturnsPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import AboutUsPage from "./pages/AboutUsPage";
-import BecomeSellerPage from "./pages/BecomeSellerPage";
 import CareersPage from "./pages/CareersPage";
-import ContactUsPage from "./pages/ContactUsPage";
+import BecomeSellerPage from "./pages/BecomeSellerPage";
+import SellersPage from "./pages/SellersPage";
+import NotFound from "./pages/NotFound";
 
-const App = () => {
-  // Move QueryClient initialization inside component
-  const queryClient = new QueryClient();
-  
+const queryClient = new QueryClient();
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <AuthProvider>
           <CartProvider>
             <AIAssistantProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <Layout>
-                  <Routes>
-                    <Route index element={<Index />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/sellers" element={<SellersPage />} />
-                    <Route path="/category/:categoryId" element={<CategoryPage />} />
-                    <Route path="/product/:productId" element={<ProductDetailPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/faq" element={<FAQPage />} />
-                    <Route path="/shipping" element={<ShippingPage />} />
-                    <Route path="/returns" element={<ReturnsPage />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/about" element={<AboutUsPage />} />
-                    <Route path="/become-seller" element={<BecomeSellerPage />} />
-                    <Route path="/careers" element={<CareersPage />} />
-                    <Route path="/contact-us" element={<ContactUsPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Layout>
-              </TooltipProvider>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/category/:categoryId" element={<CategoryPage />} />
+                  <Route path="/product/:productId" element={<ProductDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/account" element={<ProfilePage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/my-orders" element={<OrdersPage />} />
+                  <Route path="/about" element={<AboutUsPage />} />
+                  <Route path="/contact" element={<ContactUsPage />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/shipping" element={<ShippingPage />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/careers" element={<CareersPage />} />
+                  <Route path="/become-seller" element={<BecomeSellerPage />} />
+                  <Route path="/sellers" element={<SellersPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+              <Toaster />
             </AIAssistantProvider>
           </CartProvider>
         </AuthProvider>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

@@ -3,108 +3,95 @@ import { Product } from "../../types";
 import { sellers } from "../sellers";
 import { randomPrice, randomDiscountPrice, randomReviews, randomRating, randomStockQuantity, generateSpecifications } from "../utils/productUtils";
 
-// Generate home decor products
 export const generateHomeDecorProducts = (): Product[] => {
   const homeDecorProducts: Product[] = [];
-  const homeDecorNames = [
-    "Table Lamp", "Decorative Pillow", "Wall Art", "Throw Blanket", "Vase",
-    "Photo Frame", "Area Rug", "Candle Set", "Wall Clock", "Bookends",
-    "Curtains", "Planter", "Wall Mirror", "Shelf Unit", "Decorative Bowl",
-    "Throw Pillow Cover", "Table Runner", "Wind Chime", "Door Mat", "Wall Hanging",
-    "Bed Set", "Floor Lamp", "Sculpture", "Accent Table", "Tapestry",
-    "Scented Diffuser", "Jewelry Box", "Decorative Tray", "Drawer Knobs", "Coasters"
+  
+  const homeDecorData = [
+    {
+      name: "Modern Table Lamp",
+      description: "Sleek and contemporary table lamp with adjustable brightness settings.",
+      image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["lighting", "modern", "table", "adjustable"]
+    },
+    {
+      name: "Decorative Throw Pillow",
+      description: "Soft and stylish throw pillow to add comfort and color to your space.",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["pillow", "comfort", "decorative", "soft"]
+    },
+    {
+      name: "Wall Art Canvas",
+      description: "Beautiful canvas wall art to enhance your room's aesthetic appeal.",
+      image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["art", "canvas", "wall", "decorative"]
+    },
+    {
+      name: "Ceramic Vase",
+      description: "Elegant ceramic vase perfect for fresh flowers or as standalone decor.",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["ceramic", "vase", "flowers", "elegant"]
+    },
+    {
+      name: "Area Rug",
+      description: "Soft and durable area rug to define your living space with style.",
+      image: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["rug", "floor", "comfort", "style"]
+    },
+    {
+      name: "Wall Mirror",
+      description: "Stylish wall mirror to add light and depth to your room.",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["mirror", "wall", "light", "decorative"]
+    },
+    {
+      name: "Plant Pot",
+      description: "Modern plant pot perfect for indoor plants and greenery.",
+      image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["plant", "pot", "indoor", "greenery"]
+    },
+    {
+      name: "Candle Holder",
+      description: "Beautiful candle holder to create ambient lighting in your home.",
+      image: "https://images.unsplash.com/photo-1541113107947-3ddb4d2d8448?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["candle", "holder", "ambient", "lighting"]
+    },
+    {
+      name: "Wall Clock",
+      description: "Stylish wall clock that combines functionality with modern design.",
+      image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["clock", "wall", "time", "modern"]
+    },
+    {
+      name: "Picture Frame",
+      description: "Elegant picture frame to display your favorite memories.",
+      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      tags: ["frame", "picture", "memory", "display"]
+    }
   ];
   
-  const homeDecorDescriptions = [
-    "Modern design with adjustable brightness perfect for bedside or desk illumination.",
-    "Soft, plush fabric with vibrant pattern to accent any sofa or bed.",
-    "Contemporary artwork on canvas to create a focal point in any room.",
-    "Ultra-soft material with elegant design for warmth and decorative appeal.",
-    "Hand-crafted ceramic with unique glaze ideal for fresh or dried arrangements.",
-    "Elegant frame to showcase cherished memories with protective glass cover.",
-    "Plush pile with intricate pattern to define spaces and add warmth to floors.",
-    "Aromatic wax blends in decorative holders for ambiance and fragrance.",
-    "Precision timekeeping with artistic face design to complement any wall.",
-    "Heavy-duty design with artistic flair to organize and display books stylishly.",
-    "Light-filtering fabric with elegant drape to frame windows and provide privacy.",
-    "Ceramic pot with drainage and saucer for healthy indoor plants and decor.",
-    "Beveled glass with decorative frame to reflect light and create visual space.",
-    "Sturdy construction with modern design for storage and display of items.",
-    "Handcrafted design with glazed finish for centerpiece or decorative use.",
-    "Zippered covers with vibrant patterns to refresh pillows seasonally.",
-    "Intricate embroidery on premium fabric to elegantly style dining tables.",
-    "Melodic tubes with precise tuning for soothing outdoor ambiance.",
-    "Durable, absorbent material with welcoming design for entryway protection.",
-    "Textured fabric art with unique design for vertical wall interest.",
-    "Premium cotton sheets, pillowcases, and duvet cover in coordinated design.",
-    "Architectural design with adjustable height and direction for ambient lighting.",
-    "Hand-detailed figurine with artistic expression for shelf or table display.",
-    "Compact surface with distinctive base for placement of decorative items.",
-    "Woven textile artwork with rich colors for wall covering or throw.",
-    "Long-lasting fragrance oils with decorative vessel for subtle room scenting.",
-    "Lined compartments with secure closure for organizing precious items.",
-    "Multi-purpose surface with decorative edges for organizing or serving.",
-    "Unique hardware with artistic details to update cabinets and drawers.",
-    "Protective surfaces with decorative designs to prevent furniture marks."
-  ];
-  
-  const homeDecorTags = [
-    ["lamp", "lighting", "table", "modern"],
-    ["pillow", "soft", "decor", "accent"],
-    ["art", "wall", "hanging", "decor"],
-    ["blanket", "throw", "soft", "cozy"],
-    ["vase", "ceramic", "flower", "decor"],
-    ["frame", "photo", "display", "memory"],
-    ["rug", "floor", "textile", "pattern"],
-    ["candle", "scented", "ambiance", "decor"],
-    ["clock", "wall", "time", "decoration"],
-    ["bookends", "organize", "display", "decor"],
-    ["curtains", "window", "fabric", "privacy"],
-    ["planter", "plant", "garden", "indoor"],
-    ["mirror", "wall", "reflection", "decor"],
-    ["shelf", "storage", "display", "organize"],
-    ["bowl", "decorative", "centerpiece", "accent"],
-    ["pillow cover", "textile", "pattern", "decor"],
-    ["runner", "table", "fabric", "dining"],
-    ["chime", "outdoor", "sound", "hanging"],
-    ["mat", "door", "entrance", "welcome"],
-    ["wall hanging", "textile", "art", "decor"],
-    ["bed set", "bedding", "sheets", "bedroom"],
-    ["lamp", "floor", "lighting", "standing"],
-    ["sculpture", "art", "figure", "decor"],
-    ["table", "accent", "furniture", "side"],
-    ["tapestry", "wall", "textile", "art"],
-    ["diffuser", "scent", "aroma", "fragrance"],
-    ["box", "jewelry", "storage", "decor"],
-    ["tray", "serving", "decorative", "organize"],
-    ["knobs", "drawer", "hardware", "accent"],
-    ["coasters", "drink", "protect", "table"]
-  ];
-  
-  for (let i = 0; i < 150; i++) {
-    const nameIndex = i % homeDecorNames.length;
-    const descIndex = i % homeDecorDescriptions.length;
-    const tagIndex = i % homeDecorTags.length;
+  for (let i = 0; i < 80; i++) {
+    const dataIndex = i % homeDecorData.length;
     const sellerIndex = i % sellers.length;
+    const productData = homeDecorData[dataIndex];
     
-    const collection = ["Elegance", "Modern", "Rustic", "Minimalist", "Bohemian", "Classic"][i % 6];
-    const basePrice = randomPrice(19.99, 399.99);
+    const modelNumber = Math.floor(Math.random() * 1000) + 1000;
+    const basePrice = randomPrice(15.99, 199.99);
     const discountPrice = randomDiscountPrice(basePrice);
     const stockQty = randomStockQuantity();
     
     homeDecorProducts.push({
       id: `homedecor${i + 1}`,
-      name: `${collection} ${homeDecorNames[nameIndex]}`,
+      name: `${productData.name} ${modelNumber}`,
       price: basePrice,
       discountPrice: discountPrice,
-      description: homeDecorDescriptions[descIndex],
+      description: productData.description,
       category: "home-decor",
-      image: `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80`,
+      image: productData.image,
       rating: randomRating(),
       reviews: randomReviews(),
       inStock: stockQty > 0,
       stockQuantity: stockQty,
-      tags: homeDecorTags[tagIndex],
+      tags: productData.tags,
       seller: sellers[sellerIndex],
       specifications: generateSpecifications('home-decor'),
       createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
