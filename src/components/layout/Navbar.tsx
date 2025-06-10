@@ -175,12 +175,6 @@ export default function Navbar() {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .dropdown-locked .absolute {
-          position: absolute !important;
-        }
-      `}</style>
     </div>
   );
 }
