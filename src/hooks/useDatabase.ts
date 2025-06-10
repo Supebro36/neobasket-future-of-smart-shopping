@@ -19,6 +19,8 @@ export function useProducts(category?: string, limit = 30) {
   return useQuery({
     queryKey: ['products', category, limit],
     queryFn: () => DatabaseService.getProducts(category, limit),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -27,6 +29,30 @@ export function useProduct(productId: string) {
     queryKey: ['product', productId],
     queryFn: () => DatabaseService.getProductById(productId),
     enabled: !!productId,
+  });
+}
+
+export function useProductsByCategory(category: string, limit = 50) {
+  return useQuery({
+    queryKey: ['productsByCategory', category, limit],
+    queryFn: () => DatabaseService.getProducts(category, limit),
+    enabled: !!category,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useAllCategories() {
+  return useQuery({
+    queryKey: ['allCategories'],
+    queryFn: async () => {
+      // Get all products and extract unique categories
+      const products = await DatabaseService.getProducts(undefined, 1000);
+      const categories = [...new Set(products.map((p: any) => p.category))];
+      return categories;
+    },
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
   });
 }
 
@@ -120,6 +146,7 @@ export function useSearchProducts(searchQuery: string, category?: string) {
     queryKey: ['searchProducts', searchQuery, category],
     queryFn: () => DatabaseService.searchProducts(searchQuery, category),
     enabled: searchQuery.length > 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes for search results
   });
 }
 

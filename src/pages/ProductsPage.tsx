@@ -60,7 +60,10 @@ export default function ProductsPage() {
     { value: "home-decor", label: "Home Decor" },
     { value: "accessories", label: "Accessories" },
     { value: "beauty", label: "Beauty" },
-    { value: "books", label: "Books" }
+    { value: "books", label: "Books" },
+    { value: "Baby Care", label: "Baby Care" },
+    { value: "Auto Accessories", label: "Auto Accessories" },
+    { value: "Books ", label: "Books" }
   ];
   
   // Check if there might be more products to load (only for non-search mode)
